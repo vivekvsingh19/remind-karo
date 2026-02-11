@@ -82,6 +82,11 @@ class AuthRegisterWithEmailRequested extends AuthEvent {
   List<Object?> get props => [email, password];
 }
 
+/// Sign in with Google
+class AuthSignInWithGoogleRequested extends AuthEvent {
+  const AuthSignInWithGoogleRequested();
+}
+
 /// Reset to phone input
 class AuthResetRequested extends AuthEvent {
   const AuthResetRequested();

@@ -26,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignInWithEmailRequested>(_onSignInWithEmailRequested);
     on<AuthRegisterWithEmailRequested>(_onRegisterWithEmailRequested);
     on<AuthGuestLoginRequested>(_onGuestLoginRequested);
+    on<AuthSignInWithGoogleRequested>(_onSignInWithGoogleRequested);
     on<AuthResetRequested>(_onResetRequested);
 
     // Listen to auth state changes
@@ -214,6 +215,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(isLoading: true));
     await _authRepository.signOut();
     emit(AuthState.initial());
+  }
+
+  /// Sign in with Google
+  Future<void> _onSignInWithGoogleRequested(
+    AuthSignInWithGoogleRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.signInWithGoogle();
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (credential) async {
+        final user = credential.user;
+        if (user != null) {
+          add(const AuthCheckRequested());
+        }
+      },
+    );
   }
 
   /// Sign in with email
