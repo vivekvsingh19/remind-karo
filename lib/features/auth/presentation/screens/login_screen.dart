@@ -7,6 +7,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../bloc/auth_bloc.dart';
+import 'signup_screen.dart';
 
 /// Login screen with email/password authentication
 class LoginScreen extends StatefulWidget {
@@ -20,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLogin = true; // Toggle between login and register
   bool _obscurePassword = true;
 
   @override
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 10),
                   _buildHeader(),
                   const SizedBox(height: 48),
-                  _buildEmailForm(),
+                  _buildLoginForm(),
                 ],
               ),
             ),
@@ -110,20 +110,18 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildEmailForm() {
+  Widget _buildLoginForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          _isLogin ? 'Sign In' : 'Create Account',
+          'Sign In',
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          _isLogin
-              ? 'Enter your credentials to continue'
-              : 'Fill in the details to get started',
+          'Enter your credentials to continue',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
@@ -146,9 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
         CustomTextField(
           controller: _passwordController,
           labelText: 'Password',
-          hintText: _isLogin
-              ? 'Enter your password'
-              : 'Create a password (min 6 chars)',
+          hintText: 'Enter your password',
           prefixIcon: Iconsax.lock,
           obscureText: _obscurePassword,
           suffixIcon: IconButton(
@@ -178,33 +174,73 @@ class _LoginScreenState extends State<LoginScreen> {
         BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             return PrimaryButton(
-              text: _isLogin ? 'Sign In' : 'Create Account',
+              text: 'Sign In',
               isLoading: state.isLoading,
               onPressed: _submit,
             );
           },
         ),
+        const SizedBox(height: 16),
+
+        // Divider
+        Row(
+          children: [
+            Expanded(child: Divider(color: Colors.grey.shade300)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text('OR', style: Theme.of(context).textTheme.bodySmall),
+            ),
+            Expanded(child: Divider(color: Colors.grey.shade300)),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Google Sign In
+        OutlinedButton(
+          onPressed: () {
+            context.read<AuthBloc>().add(const AuthSignInWithGoogleRequested());
+          },
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            side: BorderSide(color: Colors.grey.shade300),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.login, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Sign in with Google',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 24),
 
-        // Toggle login/register
+        // Sign Up
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _isLogin
-                  ? "Don't have an account? "
-                  : "Already have an account? ",
+              "Don't have an account? ",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             GestureDetector(
               onTap: () {
-                setState(() {
-                  _isLogin = !_isLogin;
-                  _formKey.currentState?.reset();
-                });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignupScreen()),
+                );
               },
               child: Text(
-                _isLogin ? 'Sign Up' : 'Sign In',
+                'Sign Up',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.w600,
@@ -223,14 +259,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (_isLogin) {
-      context.read<AuthBloc>().add(
-        AuthSignInWithEmailRequested(email: email, password: password),
-      );
-    } else {
-      context.read<AuthBloc>().add(
-        AuthRegisterWithEmailRequested(email: email, password: password),
-      );
-    }
+    context.read<AuthBloc>().add(
+      AuthSignInWithEmailRequested(email: email, password: password),
+    );
   }
 }

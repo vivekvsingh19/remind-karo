@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/validators.dart';
@@ -20,6 +24,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _businessController = TextEditingController();
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -119,10 +125,71 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  Widget _buildProfileAvatar() {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              image: _imageFile != null
+                  ? DecorationImage(
+                      image: FileImage(_imageFile!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: _imageFile == null
+                ? const Icon(
+                    Iconsax.user,
+                    size: 60,
+                    color: AppTheme.primaryColor,
+                  )
+                : null,
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Iconsax.camera,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProfileForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildProfileAvatar(),
+        const SizedBox(height: 32),
+
         // Name field
         CustomTextField(
           controller: _nameController,
@@ -134,20 +201,26 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         ),
         const SizedBox(height: 20),
 
-        // Phone field (optional for WhatsApp reminders)
-        PhoneTextField(
+        // Phone field
+        CustomTextField(
           controller: _phoneController,
+          labelText: 'WhatsApp Number',
+          hintText: 'Enter your WhatsApp number',
+          prefixIcon: Iconsax.call,
+          keyboardType: TextInputType.phone,
           validator: (value) {
-            // Optional - only validate if provided
-            if (value != null && value.isNotEmpty && value.length != 10) {
-              return 'Enter valid 10-digit number';
+            if (value == null || value.isEmpty) {
+              return 'Please enter WhatsApp number';
+            }
+            if (value.length < 10) {
+              return 'Enter valid number';
             }
             return null;
           },
         ),
         const SizedBox(height: 8),
         Text(
-          'Optional - Your WhatsApp number for sending reminders',
+          'We will use this to send reminders on your behalf',
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondaryLight),
@@ -190,6 +263,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         phoneNumber: _phoneController.text.trim().isNotEmpty
             ? _phoneController.text.trim()
             : '0000000000', // Default if not provided
+        // TODO: Handle image upload in Bloc
         email: email,
       ),
     );

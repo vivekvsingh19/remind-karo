@@ -7,6 +7,7 @@ import '../../../notifications/presentation/bloc/notification_bloc.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../reminders/presentation/screens/manage_reminders_screen.dart';
+import '../../../reminders/presentation/screens/add_reminder_screen.dart';
 import 'dashboard_screen.dart';
 
 /// Main screen with bottom navigation
@@ -22,6 +23,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = const [
     DashboardScreen(),
+    SizedBox(), // Placeholder for Add Reminder
     ManageRemindersScreen(),
     NotificationsScreen(),
     ProfileScreen(),
@@ -44,9 +46,16 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddReminderScreen()),
+              );
+            } else {
+              setState(() {
+                _currentIndex = index;
+              });
+            }
           },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -63,9 +72,14 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Dashboard',
             ),
             const BottomNavigationBarItem(
+              icon: Icon(Iconsax.add_circle, size: 30),
+              activeIcon: Icon(Iconsax.add_circle5, size: 30),
+              label: 'Add',
+            ),
+            const BottomNavigationBarItem(
               icon: Icon(Iconsax.task_square),
               activeIcon: Icon(Iconsax.task_square5),
-              label: 'Reminders',
+              label: 'Manage',
             ),
             BottomNavigationBarItem(
               icon: BlocBuilder<NotificationBloc, NotificationState>(

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/widgets/common_widgets.dart';
+import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../data/models/reminder_model.dart';
 import '../bloc/reminder_bloc.dart';
@@ -500,54 +501,83 @@ class _ReminderDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           // Actions
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (reminder.status == ReminderStatus.pending)
-                Expanded(
-                  child: TextButton.icon(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: PrimaryButton(
                     onPressed: () {
                       context.read<ReminderBloc>().add(
                         ReminderSendRequested(reminder: reminder),
                       );
                       Navigator.pop(context);
                     },
-                    icon: const Icon(Icons.send, color: AppTheme.primaryColor),
-                    label: const Text(
-                      'Send via WhatsApp',
-                      style: TextStyle(color: AppTheme.primaryColor),
-                    ),
+                    text: 'Send via WhatsApp',
+                    icon: Icons.send,
                   ),
                 ),
               if (reminder.status != ReminderStatus.completed)
-                Expanded(
-                  child: TextButton.icon(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: OutlinedButton(
                     onPressed: () {
                       context.read<ReminderBloc>().add(
                         ReminderCompleteRequested(reminderId: reminder.id),
                       );
                       Navigator.pop(context);
                     },
-                    icon: const Icon(
-                      Icons.check_circle_outline,
-                      color: AppTheme.successColor,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: AppTheme.successColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusMedium,
+                        ),
+                      ),
                     ),
-                    label: const Text(
-                      'Mark Complete',
-                      style: TextStyle(color: AppTheme.successColor),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: AppTheme.successColor,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Mark Complete',
+                          style: TextStyle(
+                            color: AppTheme.successColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: () => _showDeleteConfirmation(context),
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppTheme.errorColor,
+              OutlinedButton(
+                onPressed: () => _showDeleteConfirmation(context),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: const BorderSide(color: AppTheme.errorColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                   ),
-                  label: const Text(
-                    'Delete',
-                    style: TextStyle(color: AppTheme.errorColor),
-                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.delete_outline, color: AppTheme.errorColor),
+                    SizedBox(width: 8),
+                    Text(
+                      'Delete',
+                      style: TextStyle(
+                        color: AppTheme.errorColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

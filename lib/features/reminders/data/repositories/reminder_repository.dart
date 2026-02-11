@@ -223,6 +223,7 @@ class ReminderRepository {
       final completed = reminders
           .where((r) => r.status == ReminderStatus.completed)
           .length;
+      final overdue = reminders.where((r) => r.isOverdue).length;
 
       return Right(
         ReminderStats(
@@ -230,6 +231,7 @@ class ReminderRepository {
           pending: pending,
           sent: sent,
           completed: completed,
+          overdue: overdue,
         ),
       );
     } on FirebaseException catch (e) {
@@ -365,12 +367,14 @@ class ReminderStats {
   final int pending;
   final int sent;
   final int completed;
+  final int overdue;
 
   const ReminderStats({
     required this.total,
     required this.pending,
     required this.sent,
     required this.completed,
+    this.overdue = 0,
   });
 
   static const empty = ReminderStats(
@@ -378,5 +382,6 @@ class ReminderStats {
     pending: 0,
     sent: 0,
     completed: 0,
+    overdue: 0,
   );
 }

@@ -43,6 +43,9 @@ class _SignupScreenState extends State<SignupScreen> {
               backgroundColor: AppTheme.errorColor,
             ),
           );
+        } else if (state.step == AuthStep.profileSetup ||
+            state.step == AuthStep.authenticated) {
+          Navigator.of(context).pop();
         }
       },
       child: Scaffold(
@@ -50,7 +53,10 @@ class _SignupScreenState extends State<SignupScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppTheme.textPrimaryLight,
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),

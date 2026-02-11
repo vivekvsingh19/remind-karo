@@ -54,24 +54,15 @@ class WhatsAppService {
       // Simulate API call delay
       await Future.delayed(const Duration(seconds: 1));
 
-      // Mock success (80% success rate for testing)
-      final random = DateTime.now().millisecondsSinceEpoch % 10;
-      if (random < 8) {
-        debugPrint(
-          '✅ Mock WhatsApp message sent to $customerName ($phoneNumber)',
-        );
-        return SendResult(
-          success: true,
-          messageId: 'mock_${DateTime.now().millisecondsSinceEpoch}',
-          timestamp: DateTime.now(),
-        );
-      } else {
-        debugPrint('❌ Mock WhatsApp message failed to $customerName');
-        return SendResult(
-          success: false,
-          error: 'Failed to send message. Please try again.',
-        );
-      }
+      // Mock success (100% success rate for demo)
+      debugPrint(
+        '✅ Mock WhatsApp message sent to $customerName ($phoneNumber)',
+      );
+      return SendResult(
+        success: true,
+        messageId: 'mock_${DateTime.now().millisecondsSinceEpoch}',
+        timestamp: DateTime.now(),
+      );
     } catch (e) {
       return SendResult(success: false, error: e.toString());
     }

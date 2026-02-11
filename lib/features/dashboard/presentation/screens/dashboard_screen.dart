@@ -248,9 +248,15 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   _buildStatDivider(),
                   _buildStatItem(
-                    'Completed',
+                    'Complete',
                     stats?.completed.toString() ?? '0',
                     Colors.green.shade200,
+                  ),
+                  _buildStatDivider(),
+                  _buildStatItem(
+                    'Overdue',
+                    stats?.overdue.toString() ?? '0',
+                    Colors.red.shade200,
                   ),
                 ],
               ),
