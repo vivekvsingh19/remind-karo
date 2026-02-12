@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -224,19 +226,16 @@ class AuthRepository {
 
       // Step 2: Authenticate (replacing signIn())
       final result = await _googleSignIn.authenticate();
-      if (result == null) {
-        return const Left(AuthFailure(message: 'Google sign in cancelled'));
-      }
 
       // Step 3: Authorization (explicitly request tokens)
-      final authorization = await result.authorizationClient.authorizeScopes([
+      final authorization = await result!.authorizationClient.authorizeScopes([
         'email',
         'https://www.googleapis.com/auth/userinfo.profile',
       ]);
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: authorization.accessToken,
-        idToken: result.idToken,
+        idToken: authorization.idToken,
       );
 
       final UserCredential userCredential = await _auth.signInWithCredential(
