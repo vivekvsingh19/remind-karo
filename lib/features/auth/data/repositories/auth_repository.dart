@@ -19,7 +19,7 @@ class AuthRepository {
     GoogleSignIn? googleSignIn,
   }) : _auth = auth ?? FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn();
+       _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
 
   /// Get current user
   User? get currentUser => _auth.currentUser;
@@ -37,7 +37,7 @@ class AuthRepository {
     required Function(FirebaseAuthException) verificationFailed,
   }) async {
     try {
-      String verificationId = '';
+      final completer = Completer<Either<Failure, String>>();
 
       await _auth.verifyPhoneNumber(
         phoneNumber: '+91$phoneNumber',
@@ -47,18 +47,25 @@ class AuthRepository {
         },
         verificationFailed: (FirebaseAuthException e) {
           verificationFailed(e);
+          if (!completer.isCompleted) {
+            completer.complete(Left(AuthFailure.fromCode(e.code)));
+          }
         },
         codeSent: (String verId, int? resendToken) {
-          verificationId = verId;
           codeSent(verId, resendToken);
+          if (!completer.isCompleted) {
+            completer.complete(Right(verId));
+          }
         },
         codeAutoRetrievalTimeout: (String verId) {
-          verificationId = verId;
+          if (!completer.isCompleted) {
+            completer.complete(Right(verId));
+          }
         },
         timeout: const Duration(seconds: 60),
       );
 
-      return Right(verificationId);
+      return completer.future;
     } on FirebaseAuthException catch (e) {
       return Left(AuthFailure.fromCode(e.code));
     } catch (e) {
@@ -212,16 +219,24 @@ class AuthRepository {
   /// Sign in with Google
   Future<Either<Failure, UserCredential>> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
+      // Step 1: Initialize if needed (version 7.x requirement)
+      // Note: In some implementations this is a singleton that needs explicit initialization
+
+      // Step 2: Authenticate (replacing signIn())
+      final result = await _googleSignIn.authenticate();
+      if (result == null) {
         return const Left(AuthFailure(message: 'Google sign in cancelled'));
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      // Step 3: Authorization (explicitly request tokens)
+      final authorization = await result.authorizationClient.authorizeScopes([
+        'email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+      ]);
+
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        accessToken: authorization.accessToken,
+        idToken: result.idToken,
       );
 
       final UserCredential userCredential = await _auth.signInWithCredential(
