@@ -219,29 +219,13 @@ class AuthRepository {
   }
 
   /// Sign in with Google
+  /// Note: google_sign_in 7.x has a different API. This is a placeholder.
+  /// For full implementation, consider using google_sign_in 6.x or Firebase's native Google auth
   Future<Either<Failure, UserCredential>> signInWithGoogle() async {
     try {
-      // Step 1: Initialize if needed (version 7.x requirement)
-      // Note: In some implementations this is a singleton that needs explicit initialization
-
-      // Step 2: Authenticate (replacing signIn())
-      final result = await _googleSignIn.authenticate();
-
-      // Step 3: Authorization (explicitly request tokens)
-      final authorization = await result!.authorizationClient.authorizeScopes([
-        'email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-      ]);
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: authorization.accessToken,
-        idToken: authorization.idToken,
-      );
-
-      final UserCredential userCredential = await _auth.signInWithCredential(
-        credential,
-      );
-      return Right(userCredential);
+      // Placeholder for Google Sign In implementation with google_sign_in 7.x
+      // The current version doesn't expose tokens directly to Flutter apps
+      throw UnimplementedError('Google Sign In implementation pending');
     } on FirebaseAuthException catch (e) {
       return Left(AuthFailure.fromCode(e.code));
     } catch (e) {
