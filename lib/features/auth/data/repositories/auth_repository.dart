@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/api_service.dart';
 import '../models/user_model.dart';
 
 /// Repository for authentication operations
@@ -14,14 +15,17 @@ class AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
+  final ApiService _apiService;
 
   AuthRepository({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
+    ApiService? apiService,
   }) : _auth = auth ?? FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
+       _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
+       _apiService = apiService ?? ApiService();
 
   /// Get current user
   User? get currentUser => _auth.currentUser;
@@ -253,5 +257,46 @@ class AuthRepository {
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
+  }
+
+  /// Signup with Backend API
+  Future<Either<Failure, Map<String, dynamic>>> signupWithApi({
+    required String name,
+    required String email,
+    required String password,
+    required String mobileNumber,
+  }) async {
+    try {
+      final response = await _apiService.signup(
+        name: name,
+        email: email,
+        password: password,
+        mobileNumber: mobileNumber,
+      );
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Login with Backend API
+  Future<Either<Failure, Map<String, dynamic>>> loginWithApi({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _apiService.login(
+        email: email,
+        password: password,
+      );
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Logout from Backend API
+  Future<void> logoutFromApi() async {
+    await _apiService.logout();
   }
 }

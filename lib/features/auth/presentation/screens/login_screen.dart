@@ -260,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     context.read<AuthBloc>().add(
-      AuthSignInWithEmailRequested(email: email, password: password),
+      AuthLoginRequested(email: email, password: password),
     );
   }
 }

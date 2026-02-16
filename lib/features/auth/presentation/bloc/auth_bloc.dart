@@ -28,6 +28,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthGuestLoginRequested>(_onGuestLoginRequested);
     on<AuthSignInWithGoogleRequested>(_onSignInWithGoogleRequested);
     on<AuthResetRequested>(_onResetRequested);
+    on<AuthSignupRequested>(_onSignupRequested);
+    on<AuthLoginRequested>(_onLoginRequested);
 
     // Listen to auth state changes
     _authSubscription = _authRepository.authStateChanges.listen((user) {
@@ -310,6 +312,60 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     // Reset state and set step to guest
     emit(AuthState(step: AuthStep.guest));
+  }
+
+  /// Backend API Signup
+  Future<void> _onSignupRequested(
+    AuthSignupRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.signupWithApi(
+      name: event.name,
+      email: event.email,
+      password: event.password,
+      mobileNumber: event.mobileNumber,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // Signup successful, now auto-login
+        add(AuthLoginRequested(email: event.email, password: event.password));
+      },
+    );
+  }
+
+  /// Backend API Login
+  Future<void> _onLoginRequested(
+    AuthLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.loginWithApi(
+      email: event.email,
+      password: event.password,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // Login successful - token is already saved in API service
+        emit(
+          state.copyWith(
+            isLoading: false,
+            step: AuthStep.authenticated,
+            error: null,
+          ),
+        );
+      },
+    );
   }
 
   @override

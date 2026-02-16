@@ -96,3 +96,35 @@ class AuthResetRequested extends AuthEvent {
 class AuthGuestLoginRequested extends AuthEvent {
   const AuthGuestLoginRequested();
 }
+
+/// Backend API Signup
+class AuthSignupRequested extends AuthEvent {
+  final String name;
+  final String email;
+  final String password;
+  final String mobileNumber;
+
+  const AuthSignupRequested({
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.mobileNumber,
+  });
+
+  @override
+  List<Object?> get props => [name, email, password, mobileNumber];
+}
+
+/// Backend API Login
+class AuthLoginRequested extends AuthEvent {
+  final String email;
+  final String password;
+
+  const AuthLoginRequested({
+    required this.email,
+    required this.password,
+  });
+
+  @override
+  List<Object?> get props => [email, password];
+}

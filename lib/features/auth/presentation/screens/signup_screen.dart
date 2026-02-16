@@ -18,7 +18,9 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -26,7 +28,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
+    _mobileController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -133,6 +137,22 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         const SizedBox(height: 32),
 
+        // Name field
+        CustomTextField(
+          controller: _nameController,
+          labelText: 'Full Name',
+          hintText: 'Enter your full name',
+          prefixIcon: Iconsax.user,
+          keyboardType: TextInputType.name,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your name';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 20),
+
         // Email field
         CustomTextField(
           controller: _emailController,
@@ -141,6 +161,25 @@ class _SignupScreenState extends State<SignupScreen> {
           prefixIcon: Iconsax.sms,
           keyboardType: TextInputType.emailAddress,
           validator: Validators.validateEmail,
+        ),
+        const SizedBox(height: 20),
+
+        // Mobile Number field
+        CustomTextField(
+          controller: _mobileController,
+          labelText: 'Mobile Number',
+          hintText: 'Enter your mobile number',
+          prefixIcon: Iconsax.call,
+          keyboardType: TextInputType.phone,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your mobile number';
+            }
+            if (value.length < 10) {
+              return 'Please enter a valid mobile number';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 20),
 
@@ -245,11 +284,18 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
+    final mobile = _mobileController.text.trim();
     final password = _passwordController.text;
 
     context.read<AuthBloc>().add(
-      AuthRegisterWithEmailRequested(email: email, password: password),
+      AuthSignupRequested(
+        name: name,
+        email: email,
+        password: password,
+        mobileNumber: mobile,
+      ),
     );
   }
 }
