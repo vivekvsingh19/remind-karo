@@ -5,10 +5,7 @@ import '../../core/theme/app_theme.dart';
 class SplashScreenWrapper extends StatefulWidget {
   final Widget child;
 
-  const SplashScreenWrapper({
-    super.key,
-    required this.child,
-  });
+  const SplashScreenWrapper({super.key, required this.child});
 
   @override
   State<SplashScreenWrapper> createState() => _SplashScreenWrapperState();

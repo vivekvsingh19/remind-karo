@@ -9,17 +9,30 @@ class TCustomCurvedEdges extends CustomClipper<Path> {
 
     final firstCurve = Offset(0, size.height - 20);
     final lastCurve = Offset(30, size.height - 20);
-    path.quadraticBezierTo(firstCurve.dx, firstCurve.dy, lastCurve.dx, lastCurve.dy);
+    path.quadraticBezierTo(
+      firstCurve.dx,
+      firstCurve.dy,
+      lastCurve.dx,
+      lastCurve.dy,
+    );
 
     final secondFirstCurve = Offset(0, size.height - 20);
     final secondLastCurve = Offset(size.width - 30, size.height - 20);
     path.quadraticBezierTo(
-        secondFirstCurve.dx, secondFirstCurve.dy, secondLastCurve.dx, secondLastCurve.dy);
+      secondFirstCurve.dx,
+      secondFirstCurve.dy,
+      secondLastCurve.dx,
+      secondLastCurve.dy,
+    );
 
     final thirdFirstCurve = Offset(size.width, size.height - 20);
     final thirdLastCurve = Offset(size.width, size.height);
     path.quadraticBezierTo(
-        thirdFirstCurve.dx, thirdFirstCurve.dy, thirdLastCurve.dx, thirdLastCurve.dy);
+      thirdFirstCurve.dx,
+      thirdFirstCurve.dy,
+      thirdLastCurve.dx,
+      thirdLastCurve.dy,
+    );
 
     path.lineTo(size.width, 0);
     path.close();
@@ -37,16 +50,22 @@ class CurvedContainer extends StatelessWidget {
   final Color backgroundColor;
   final Widget child;
   final EdgeInsets padding;
+  final bool showCurve;
 
   const CurvedContainer({
     super.key,
     required this.backgroundColor,
     required this.child,
     this.padding = const EdgeInsets.all(24),
+    this.showCurve = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!showCurve) {
+      return Container(color: backgroundColor, padding: padding, child: child);
+    }
+
     return ClipPath(
       clipper: TCustomCurvedEdges(),
       child: Container(color: backgroundColor, padding: padding, child: child),
@@ -59,16 +78,22 @@ class CurvedContainerRounded extends StatelessWidget {
   final Color backgroundColor;
   final Widget child;
   final EdgeInsets padding;
+  final bool showCurve;
 
   const CurvedContainerRounded({
     super.key,
     required this.backgroundColor,
     required this.child,
     this.padding = const EdgeInsets.all(24),
+    this.showCurve = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!showCurve) {
+      return Container(color: backgroundColor, padding: padding, child: child);
+    }
+
     return ClipPath(
       clipper: TCustomCurvedEdges(),
       child: Container(color: backgroundColor, padding: padding, child: child),

@@ -80,6 +80,13 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          title: Text(
+            'Create Account',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -88,11 +95,7 @@ class _SignupScreenState extends State<SignupScreen> {
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 48),
-                  _buildSignupForm(),
-                ],
+                children: [const SizedBox(height: 24), _buildSignupForm()],
               ),
             ),
           ),
@@ -101,59 +104,10 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Iconsax.user_add,
-            size: 48,
-            color: AppTheme.primaryColor,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Create Account',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Join RemindKaro today',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondaryLight),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSignupForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Sign Up',
-          style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Fill in the details to get started',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 32),
-
         // Name field
         CustomTextField(
           controller: _nameController,

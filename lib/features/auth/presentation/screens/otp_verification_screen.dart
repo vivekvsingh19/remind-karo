@@ -5,6 +5,7 @@ import 'package:pinput/pinput.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../presentation/widgets/curved_container.dart';
 import '../bloc/auth_bloc.dart';
 
 /// OTP Verification Screen
@@ -76,14 +77,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimaryLight),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           // Reset submission flag when request completes
@@ -91,22 +84,49 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             setState(() => _isSubmitting = false);
           }
         },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 48),
-                _buildOtpForm(
-                  context,
-                  defaultPinTheme,
-                  focusedPinTheme,
-                  errorPinTheme,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              CurvedContainerRounded(
+                backgroundColor: AppTheme.primaryColor,
+                padding: const EdgeInsets.only(
+                  top: 16,
+                  bottom: 50,
+                  left: 24,
+                  right: 24,
                 ),
-              ],
-            ),
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                      _buildHeader(),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 48),
+                    _buildOtpForm(
+                      context,
+                      defaultPinTheme,
+                      focusedPinTheme,
+                      errorPinTheme,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -119,29 +139,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Iconsax.sms,
-            size: 48,
-            color: AppTheme.primaryColor,
-          ),
+          child: const Icon(Iconsax.verify, size: 48, color: Colors.white),
         ),
         const SizedBox(height: 24),
         Text(
-          'Verify Your Email',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          'Verify Email',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          'Enter the 6-digit OTP sent to ${widget.email}',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondaryLight),
+          'Enter the 6-digit code sent to your email',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
           textAlign: TextAlign.center,
         ),
       ],

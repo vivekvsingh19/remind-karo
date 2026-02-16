@@ -100,18 +100,24 @@ class _LoginScreenState extends State<LoginScreen> {
             color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Iconsax.notification5,
-            size: 48,
-            color: Colors.white,
+          child: Image.asset(
+            'assets/icons/remindkaro.png',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.notifications_active_rounded,
+                size: 48,
+                color: Colors.white,
+              );
+            },
           ),
         ),
         const SizedBox(height: 24),
         Text(
           'Welcome to RemindKaro',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineMedium?.copyWith(
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -120,9 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         Text(
           'WhatsApp Reminder Automation',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
@@ -144,9 +148,9 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 8),
           Text(
             'Enter your credentials to continue',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textSecondaryLight,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -217,34 +221,36 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Google Sign In
-          OutlinedButton(
-            onPressed: () {
-              context.read<AuthBloc>().add(const AuthSignInWithGoogleRequested());
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              side: BorderSide(color: Colors.grey.shade300),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.login, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Sign in with Google',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          ),
+          // // Google Sign In
+          // OutlinedButton(
+          //   onPressed: () {
+          //     context.read<AuthBloc>().add(
+          //       const AuthSignInWithGoogleRequested(),
+          //     );
+          //   },
+          //   style: OutlinedButton.styleFrom(
+          //     padding: const EdgeInsets.symmetric(vertical: 16),
+          //     side: BorderSide(color: Colors.grey.shade300),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          //     ),
+          //   ),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       const Icon(Icons.login, size: 24),
+          //       const SizedBox(width: 8),
+          //       Text(
+          //         'Sign in with Google',
+          //         style: Theme.of(
+          //           context,
+          //         ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+          //       ),
+          //     ],
+          //   ),
+          // ),
 
-          const SizedBox(height: 24),
+          // const SizedBox(height: 24),
 
           // Sign Up
           Row(

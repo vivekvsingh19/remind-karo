@@ -84,9 +84,7 @@ class RemindKaroApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
-          home: SplashScreenWrapper(
-            child: const AuthWrapper(),
-          ),
+          home: SplashScreenWrapper(child: const AuthWrapper()),
         ),
       ),
     );
@@ -118,9 +116,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, state) {
         if (state.isLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
