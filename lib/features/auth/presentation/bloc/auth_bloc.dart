@@ -30,6 +30,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthResetRequested>(_onResetRequested);
     on<AuthSignupRequested>(_onSignupRequested);
     on<AuthLoginRequested>(_onLoginRequested);
+    on<AuthVerifyEmailOtpRequested>(_onVerifyEmailOtpRequested);
+    on<AuthResendOtpRequested>(_onResendOtpRequested);
+    on<AuthDeleteAccountRequested>(_onDeleteAccountRequested);
 
     // Listen to auth state changes
     _authSubscription = _authRepository.authStateChanges.listen((user) {
@@ -333,8 +336,59 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(isLoading: false, error: failure.message));
       },
       (response) {
-        // Signup successful, now auto-login
+        // Signup successful, show OTP verification screen
+        emit(
+          state.copyWith(
+            isLoading: false,
+            step: AuthStep.emailOtpVerification,
+            error: null,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Verify Email OTP
+  Future<void> _onVerifyEmailOtpRequested(
+    AuthVerifyEmailOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    print('🔐 OTP Verification: Starting for email ${event.email}');
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.verifyEmailOtp(
+      email: event.email,
+      otp: event.otp,
+    );
+
+    result.fold(
+      (failure) {
+        print('❌ OTP Verification failed: ${failure.message}');
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // OTP verified successfully, auto-login
+        print('✅ OTP Verification successful, proceeding to login');
         add(AuthLoginRequested(email: event.email, password: event.password));
+      },
+    );
+  }
+
+  /// Resend OTP
+  Future<void> _onResendOtpRequested(
+    AuthResendOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.resendOtp(email: event.email);
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        emit(state.copyWith(isLoading: false, error: null));
       },
     );
   }
@@ -344,6 +398,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('🔑 Login: Starting for email ${event.email}');
     emit(state.copyWith(isLoading: true, clearError: true));
 
     final result = await _authRepository.loginWithApi(
@@ -353,10 +408,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) {
+        print('❌ Login failed: ${failure.message}');
         emit(state.copyWith(isLoading: false, error: failure.message));
       },
       (response) {
         // Login successful - token is already saved in API service
+        print('✅ Login successful, setting authenticated state');
         emit(
           state.copyWith(
             isLoading: false,
@@ -364,6 +421,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             error: null,
           ),
         );
+      },
+    );
+  }
+
+  /// Delete account
+  Future<void> _onDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    print('🗑️  Starting account deletion...');
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.deleteAccountFromApi();
+
+    result.fold(
+      (failure) {
+        print('❌ Delete account failed: ${failure.message}');
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // Account deleted successfully
+        print('✅ Account deleted successfully');
+        emit(AuthState.initial());
       },
     );
   }

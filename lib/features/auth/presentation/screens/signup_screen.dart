@@ -7,6 +7,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../bloc/auth_bloc.dart';
+import 'otp_verification_screen.dart';
 
 /// Signup screen with email/password authentication
 class SignupScreen extends StatefulWidget {
@@ -47,8 +48,24 @@ class _SignupScreenState extends State<SignupScreen> {
               backgroundColor: AppTheme.errorColor,
             ),
           );
-        } else if (state.step == AuthStep.profileSetup ||
-            state.step == AuthStep.authenticated) {
+        } else if (state.step == AuthStep.emailOtpVerification) {
+          // Navigate to OTP verification screen
+          final email = _emailController.text.trim();
+          final name = _nameController.text.trim();
+          final password = _passwordController.text;
+          final mobile = _mobileController.text.trim();
+
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => OtpVerificationScreen(
+                email: email,
+                name: name,
+                password: password,
+                mobileNumber: mobile,
+              ),
+            ),
+          );
+        } else if (state.step == AuthStep.authenticated) {
           Navigator.of(context).pop();
         }
       },

@@ -154,6 +154,21 @@ class ProfileScreen extends StatelessWidget {
                     label: const Text('Log Out'),
                   ),
                 ),
+                const SizedBox(height: 12),
+                // Delete account button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showDeleteAccountConfirmation(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.errorColor,
+                      side: const BorderSide(color: AppTheme.errorColor),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    icon: const Icon(Iconsax.trash),
+                    label: const Text('Delete Account'),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 // Version info
                 Center(
@@ -312,6 +327,88 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          // Show error if deletion fails
+          if (state.error != null && state.error!.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error!),
+                backgroundColor: AppTheme.errorColor,
+              ),
+            );
+          }
+          // Navigate to login on successful deletion
+          if (state.step == AuthStep.phone &&
+              !state.isLoading &&
+              state.error == null) {
+            Navigator.pop(dialogContext);
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+            );
+          }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            return AlertDialog(
+              title: const Text('Delete Account'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.isLoading)
+                      const SizedBox(
+                        height: 60,
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (state.error != null && state.error!.isNotEmpty)
+                      Column(
+                        children: [
+                          Text(
+                            'Error: ${state.error}',
+                            style: TextStyle(color: AppTheme.errorColor),
+                          ),
+                        ],
+                      )
+                    else
+                      const Text(
+                        'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.',
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: state.isLoading
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: state.isLoading
+                      ? null
+                      : () {
+                          context.read<AuthBloc>().add(
+                            const AuthDeleteAccountRequested(),
+                          );
+                        },
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(color: AppTheme.errorColor),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

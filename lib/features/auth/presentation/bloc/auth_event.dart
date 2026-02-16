@@ -125,3 +125,38 @@ class AuthLoginRequested extends AuthEvent {
   @override
   List<Object?> get props => [email, password];
 }
+
+/// Verify Email OTP (Email verification flow)
+class AuthVerifyEmailOtpRequested extends AuthEvent {
+  final String email;
+  final String otp;
+  final String name;
+  final String password;
+  final String mobileNumber;
+
+  const AuthVerifyEmailOtpRequested({
+    required this.email,
+    required this.otp,
+    required this.name,
+    required this.password,
+    required this.mobileNumber,
+  });
+
+  @override
+  List<Object?> get props => [email, otp, name, password, mobileNumber];
+}
+
+/// Resend OTP
+class AuthResendOtpRequested extends AuthEvent {
+  final String email;
+
+  const AuthResendOtpRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// Delete account
+class AuthDeleteAccountRequested extends AuthEvent {
+  const AuthDeleteAccountRequested();
+}

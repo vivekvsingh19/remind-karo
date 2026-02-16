@@ -285,12 +285,53 @@ class AuthRepository {
     required String password,
   }) async {
     try {
+      print('📄 Repository: Login attempt for $email');
       final response = await _apiService.login(
         email: email,
         password: password,
       );
+      print('✅ Repository: Login successful for $email');
       return Right(response);
     } catch (e) {
+      print('❌ Repository: Login error for $email: $e');
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Verify Email OTP
+  Future<Either<Failure, Map<String, dynamic>>> verifyEmailOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await _apiService.verifyOtp(email: email, otp: otp);
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Resend OTP
+  Future<Either<Failure, Map<String, dynamic>>> resendOtp({
+    required String email,
+  }) async {
+    try {
+      final response = await _apiService.resendOtp(email: email);
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Delete account from Backend API
+  Future<Either<Failure, Map<String, dynamic>>> deleteAccountFromApi() async {
+    try {
+      print('📡 Calling deleteAccount API...');
+      final response = await _apiService.deleteAccount();
+      print('✅ Delete account response: $response');
+      return Right(response);
+    } catch (e) {
+      print('❌ Delete account error: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }

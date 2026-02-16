@@ -160,6 +160,7 @@ class AuthWrapper extends StatelessWidget {
             return const ProfileSetupScreen();
           case AuthStep.phone:
           case AuthStep.otp:
+          case AuthStep.emailOtpVerification:
             return const LoginScreen();
         }
       },
@@ -186,17 +187,11 @@ class _SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.notifications_active_rounded,
-                  size: 64,
-                  color: Colors.white,
-                ),
+              Image.asset(
+                'assets/icons/remindkaro.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
               ),
               const SizedBox(height: 32),
               const Text(

@@ -1,7 +1,14 @@
 part of 'auth_bloc.dart';
 
 /// Authentication steps
-enum AuthStep { phone, otp, profileSetup, authenticated, guest }
+enum AuthStep {
+  phone,
+  otp,
+  profileSetup,
+  authenticated,
+  guest,
+  emailOtpVerification,
+}
 
 /// Auth state
 class AuthState extends Equatable {

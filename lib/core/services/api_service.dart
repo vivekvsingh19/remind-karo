@@ -62,19 +62,25 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('🔌 API: Sending login request for $email');
       final response = await _dio.post(
         '/login',
         data: {'email': email, 'password': password},
       );
 
+      print('✅ API: Login response received: ${response.statusCode}');
+
       // Save token if present
       if (response.data['token'] != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', response.data['token']);
+        print('✅ API: Token saved to SharedPreferences');
       }
 
       return response.data;
     } on DioException catch (e) {
+      print('❌ API: Login failed - ${e.type}: ${e.message}');
+      print('❌ API: Response: ${e.response?.data}');
       throw _handleError(e);
     }
   }
@@ -85,6 +91,58 @@ class ApiService {
       final response = await _dio.get('/profile');
       return response.data;
     } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Verify OTP
+  Future<Map<String, dynamic>> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      print('🔌 API: Sending OTP verification request for $email');
+      final response = await _dio.post(
+        '/verify-otp',
+        data: {'email': email, 'otp': otp},
+      );
+      print(
+        '✅ API: OTP verification response received: ${response.statusCode}',
+      );
+      return response.data;
+    } on DioException catch (e) {
+      print('❌ API: OTP verification failed - ${e.type}: ${e.message}');
+      print('❌ API: Response: ${e.response?.data}');
+      throw _handleError(e);
+    }
+  }
+
+  /// Resend OTP
+  Future<Map<String, dynamic>> resendOtp({required String email}) async {
+    try {
+      final response = await _dio.post('/resend-otp', data: {'email': email});
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Delete account
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      print('🗑️  Sending DELETE request to /delete-account');
+      final response = await _dio.delete('/delete-account');
+      print('✅ Delete response status: ${response.statusCode}');
+      print('✅ Delete response data: ${response.data}');
+      // Clear token after successful deletion
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      print('✅ Token cleared from SharedPreferences');
+      return response.data;
+    } on DioException catch (e) {
+      print('❌ DIO Error: ${e.type} - ${e.message}');
+      print('❌ Response status: ${e.response?.statusCode}');
+      print('❌ Response data: ${e.response?.data}');
       throw _handleError(e);
     }
   }

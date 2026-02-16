@@ -209,8 +209,8 @@ app.post("/verify-otp", async (req, res) => {
         [email]
       );
       console.log(`Available OTPs for ${email}:`, debugResult.rows);
-      
-      return res.status(400).json({ 
+
+      return res.status(400).json({
         message: "Invalid OTP ❌",
         debug: {
           providedOTP: otp,
@@ -251,12 +251,83 @@ app.post("/verify-otp", async (req, res) => {
 
 
 // =======================================
+// RESEND OTP ROUTE
+// =======================================
+app.post("/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email required ❌" });
+    }
+
+    // Check if user exists
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ message: "User not found ❌" });
+    }
+
+    // Delete old OTPs
+    await pool.query(
+      "DELETE FROM otp_verifications WHERE email = $1",
+      [email]
+    );
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Save new OTP
+    await pool.query(
+      "INSERT INTO otp_verifications (email, otp, expires_at) VALUES ($1, $2, $3)",
+      [email, otp, expiresAt]
+    );
+
+    // Send OTP Email
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Verify your RemindKaro account - New OTP",
+        text: `Your new OTP is ${otp}. It will expire in 5 minutes.`,
+        html: `
+          <h2>Email Verification</h2>
+          <p>Your new OTP is: <strong>${otp}</strong></p>
+          <p>This OTP will expire in 5 minutes.</p>
+          <p>Do not share this OTP with anyone.</p>
+        `,
+      });
+      console.log("✅ OTP resent to:", email);
+    } catch (emailError) {
+      console.error("❌ Email send error:", emailError.message);
+    }
+
+    res.json({
+      message: "OTP resent to your email ✅",
+      otp: otp, // For testing only
+    });
+
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    res.status(500).json({
+      message: "Server error ❌",
+      error: err.message,
+    });
+  }
+});
+
+
+// =======================================
 // DEBUG: GET OTP ROUTE (FOR TESTING ONLY)
 // =======================================
 app.get("/get-otp/:email", async (req, res) => {
   try {
     const { email } = req.params;
-    
+
     const result = await pool.query(
       "SELECT otp, expires_at FROM otp_verifications WHERE email = $1 ORDER BY created_at DESC LIMIT 1",
       [email]
@@ -269,8 +340,8 @@ app.get("/get-otp/:email", async (req, res) => {
     const record = result.rows[0];
     const isExpired = new Date() > new Date(record.expires_at);
 
-    res.json({ 
-      email, 
+    res.json({
+      email,
       otp: record.otp,
       expires_at: record.expires_at,
       expired: isExpired
@@ -374,6 +445,50 @@ app.get("/profile", authenticateToken, async (req, res) => {
 
   } catch (err) {
     console.error("Profile error:", err);
+    res.status(500).json({
+      message: "Server error ❌",
+      error: err.message,
+    });
+  }
+});
+
+
+// =======================================
+// DELETE ACCOUNT ROUTE (PROTECTED)
+// =======================================
+app.delete("/delete-account", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const email = req.user.email;
+
+    console.log("🗑️  Deleting account for user_id:", userId, "email:", email);
+
+    // First, delete any OTP records for this user's email
+    await pool.query(
+      "DELETE FROM otp_verifications WHERE email = $1",
+      [email]
+    );
+
+    // Then delete user from database
+    const deleteResult = await pool.query(
+      "DELETE FROM users WHERE user_id = $1",
+      [userId]
+    );
+
+    if (deleteResult.rowCount === 0) {
+      return res.status(404).json({
+        message: "User not found ❌",
+      });
+    }
+
+    console.log("✅ Account deleted successfully for user_id:", userId);
+
+    res.status(200).json({
+      message: "Account deleted successfully ✅",
+    });
+
+  } catch (err) {
+    console.error("Delete account error:", err);
     res.status(500).json({
       message: "Server error ❌",
       error: err.message,
