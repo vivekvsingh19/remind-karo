@@ -15,6 +15,7 @@ import 'features/notifications/presentation/bloc/notification_bloc.dart';
 import 'features/reminders/data/repositories/reminder_repository.dart';
 import 'features/reminders/presentation/bloc/reminder_bloc.dart';
 import 'firebase_options.dart';
+import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,7 +84,9 @@ class RemindKaroApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
-          home: const AuthWrapper(),
+          home: SplashScreenWrapper(
+            child: const AuthWrapper(),
+          ),
         ),
       ),
     );
@@ -114,7 +117,11 @@ class AuthWrapper extends StatelessWidget {
       },
       builder: (context, state) {
         if (state.isLoading) {
-          return const _SplashScreen();
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
 
         if (state.error != null && !state.isAuthenticated) {
@@ -164,61 +171,6 @@ class AuthWrapper extends StatelessWidget {
             return const LoginScreen();
         }
       },
-    );
-  }
-}
-
-/// Splash screen shown during loading
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/icons/remindkaro.png',
-                width: 120,
-                height: 120,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'RemindKaro',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'WhatsApp Reminder Automation',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 48),
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
