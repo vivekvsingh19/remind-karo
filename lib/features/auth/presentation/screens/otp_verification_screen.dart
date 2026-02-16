@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
@@ -102,7 +103,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
@@ -116,7 +120,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 8),
                     _buildOtpForm(
                       context,
                       defaultPinTheme,
@@ -176,10 +180,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       children: [
         Text(
           'OTP Verification',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 08),
         Text(
           'Check your email for the verification code',
           style: Theme.of(
@@ -221,9 +228,28 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             return Center(
-              child: TextButton(
-                onPressed: state.isLoading ? null : () => _resendOtp(context),
-                child: const Text('Didn\'t receive code? Resend OTP'),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Didn\'t receive code? ',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.black),
+                    ),
+                    TextSpan(
+                      text: 'Resend OTP',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      recognizer: state.isLoading
+                          ? null
+                          : (TapGestureRecognizer()
+                              ..onTap = () => _resendOtp(context)),
+                    ),
+                  ],
+                ),
               ),
             );
           },
