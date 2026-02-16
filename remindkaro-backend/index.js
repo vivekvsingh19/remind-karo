@@ -167,6 +167,7 @@ app.post("/signup", async (req, res) => {
     res.status(201).json({
       message: "User registered successfully ✅. Please verify your email.",
       user: newUser.rows[0],
+      otp: otp, // ✅ OTP included for testing (remove in production)
       note: "OTP has been sent to your email. It expires in 5 minutes.",
     });
 
@@ -191,14 +192,31 @@ app.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ message: "Email and OTP required ❌" });
     }
 
+    console.log(`Verifying OTP for ${email}: ${otp}`);
+
     // Find matching OTP
     const result = await pool.query(
       "SELECT * FROM otp_verifications WHERE email = $1 AND otp = $2 ORDER BY created_at DESC LIMIT 1",
       [email, otp]
     );
 
+    console.log(`OTP Query Result:`, result.rows);
+
     if (result.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid OTP ❌" });
+      // Debug: show what OTPs exist for this email
+      const debugResult = await pool.query(
+        "SELECT email, otp, expires_at FROM otp_verifications WHERE email = $1 ORDER BY created_at DESC LIMIT 3",
+        [email]
+      );
+      console.log(`Available OTPs for ${email}:`, debugResult.rows);
+      
+      return res.status(400).json({ 
+        message: "Invalid OTP ❌",
+        debug: {
+          providedOTP: otp,
+          availableOTPs: debugResult.rows.map(r => ({ otp: r.otp, expires_at: r.expires_at }))
+        }
+      });
     }
 
     const record = result.rows[0];
@@ -230,6 +248,42 @@ app.post("/verify-otp", async (req, res) => {
     });
   }
 });
+
+
+// =======================================
+// DEBUG: GET OTP ROUTE (FOR TESTING ONLY)
+// =======================================
+app.get("/get-otp/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    const result = await pool.query(
+      "SELECT otp, expires_at FROM otp_verifications WHERE email = $1 ORDER BY created_at DESC LIMIT 1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No OTP found for this email ❌" });
+    }
+
+    const record = result.rows[0];
+    const isExpired = new Date() > new Date(record.expires_at);
+
+    res.json({ 
+      email, 
+      otp: record.otp,
+      expires_at: record.expires_at,
+      expired: isExpired
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching OTP ❌",
+      error: err.message,
+    });
+  }
+});
+
 
 
 // =======================================
