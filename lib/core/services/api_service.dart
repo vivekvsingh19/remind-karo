@@ -7,16 +7,14 @@ class ApiService {
   // For emulator: Use 10.0.2.2
   static const String baseUrl = 'http://192.168.1.8:5000';
   late final Dio _dio;
-  
+
   ApiService() {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       ),
     );
 
@@ -66,18 +64,15 @@ class ApiService {
     try {
       final response = await _dio.post(
         '/login',
-        data: {
-          'email': email,
-          'password': password,
-        },
+        data: {'email': email, 'password': password},
       );
-      
+
       // Save token if present
       if (response.data['token'] != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', response.data['token']);
       }
-      
+
       return response.data;
     } on DioException catch (e) {
       throw _handleError(e);
@@ -115,8 +110,8 @@ class ApiService {
         return data['message'];
       }
       return 'Server error: ${e.response?.statusCode}';
-    } 
-    
+    }
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         return 'Connection timeout (30s). Make sure:\n'
