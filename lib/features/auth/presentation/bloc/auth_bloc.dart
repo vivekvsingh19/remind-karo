@@ -28,9 +28,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
-    // For backend API, we simply initialize the app
-    // The user will be redirected to login if not authenticated
-    emit(AuthState.initial());
+    emit(state.copyWith(isLoading: true));
+    
+    try {
+      // Check if user has a saved token by fetching profile
+      final result = await _authRepository.getProfileFromApi();
+      
+      result.fold(
+        (failure) {
+          // No valid token or profile fetch failed - go to login
+          print('❌ Auth Check: No valid session, going to login');
+          emit(AuthState.initial());
+        },
+        (profileData) {
+          // Token exists and profile fetched successfully - restore authenticated state
+          print('✅ Auth Check: Session restored, user authenticated');
+          final userProfile = UserModel.fromJson(profileData['user'] ?? profileData);
+          emit(AuthState.authenticated(userProfile: userProfile).copyWith(isLoading: false));
+        },
+      );
+    } catch (e) {
+      print('❌ Auth Check: Error checking authentication: $e');
+      emit(AuthState.initial());
+    }
   }
 
   /// Sign out

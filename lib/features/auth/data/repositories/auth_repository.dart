@@ -7,12 +7,19 @@ import '../../../../core/services/api_service.dart';
 class AuthRepository {
   final ApiService _apiService;
 
-  AuthRepository({
-    ApiService? apiService,
-  }) : _apiService = apiService ?? ApiService();
+  AuthRepository({ApiService? apiService})
+    : _apiService = apiService ?? ApiService();
 
-  /// Check if user is logged in
-  bool get isLoggedIn => false; // Determined by API service token presence
+  /// Check if user is logged in and has a valid token
+  Future<bool> isLoggedIn() async {
+    try {
+      // Try to fetch profile to verify token validity
+      final result = await getProfileFromApi();
+      return result.fold((failure) => false, (success) => true);
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Signup with Backend API
   Future<Either<Failure, Map<String, dynamic>>> signupWithApi({
@@ -60,10 +67,7 @@ class AuthRepository {
   }) async {
     try {
       print('📄 Repository: Verifying OTP for $email');
-      final response = await _apiService.verifyOtp(
-        email: email,
-        otp: otp,
-      );
+      final response = await _apiService.verifyOtp(email: email, otp: otp);
       print('✅ Repository: OTP verified for $email');
       return Right(response);
     } catch (e) {

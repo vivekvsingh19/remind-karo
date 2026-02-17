@@ -97,44 +97,10 @@ class AuthWrapper extends StatelessWidget {
         // Using backend API auth - subscriptions handled by API
       },
       builder: (context, state) {
-        if (state.isLoading) {
+        if (state.isLoading && state.step == AuthStep.phone) {
+          // Only show loading for initial auth check, not during login
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (state.error != null && !state.isAuthenticated) {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppTheme.errorColor,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Something went wrong',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.error!,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AuthBloc>().add(const AuthCheckRequested());
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
           );
         }
 

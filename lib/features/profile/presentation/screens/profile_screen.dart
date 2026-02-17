@@ -42,12 +42,12 @@ class ProfileScreen extends StatelessWidget {
                 // Account section
                 _buildSection(
                   context,
-                  title: 'Account',
+                  title: 'Account Information',
                   children: [
                     _buildSettingsItem(
                       context,
                       icon: Iconsax.user,
-                      title: 'Personal Information',
+                      title: 'Full Name',
                       subtitle: user?.name ?? 'Not set',
                       onTap: () {
                         // TODO: Navigate to edit profile
@@ -68,6 +68,38 @@ class ProfileScreen extends StatelessWidget {
                         icon: Iconsax.sms,
                         title: 'Email',
                         subtitle: user!.email!,
+                        onTap: null,
+                      ),
+                    if (user?.id != null && user!.id.isNotEmpty)
+                      _buildSettingsItem(
+                        context,
+                        icon: Iconsax.document,
+                        title: 'User ID',
+                        subtitle: user!.id,
+                        onTap: null,
+                      ),
+                    if (user?.photoUrl != null && user!.photoUrl!.isNotEmpty)
+                      _buildSettingsItem(
+                        context,
+                        icon: Iconsax.image,
+                        title: 'Profile Photo',
+                        subtitle: 'Photo URL set',
+                        onTap: null,
+                      ),
+                    if (user?.createdAt != null)
+                      _buildSettingsItem(
+                        context,
+                        icon: Iconsax.calendar_1,
+                        title: 'Account Created',
+                        subtitle: _formatDate(user!.createdAt),
+                        onTap: null,
+                      ),
+                    if (user?.updatedAt != null)
+                      _buildSettingsItem(
+                        context,
+                        icon: Iconsax.edit,
+                        title: 'Last Updated',
+                        subtitle: _formatDate(user!.updatedAt),
                         onTap: null,
                       ),
                   ],
@@ -185,6 +217,28 @@ class ProfileScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _formatDate(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return '$weeks week${weeks > 1 ? 's' : ''} ago';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '$months month${months > 1 ? 's' : ''} ago';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return '$years year${years > 1 ? 's' : ''} ago';
+    }
   }
 
   Widget _buildProfileHeader(BuildContext context, String name) {

@@ -124,11 +124,12 @@ app.post("/signup", async (req, res) => {
       // If email is already verified, don't allow re-signup
       if (user.is_email_verified) {
         return res.status(400).json({
-          message: "Email already registered ❌",
+          message: "Email already registered. Please login instead ❌",
         });
       }
 
-      // If email not verified, delete old record and allow re-signup
+      // If email not verified, delete old record and allow fresh signup
+      console.log(`🗑️ Deleting unverified account for ${email} to allow fresh signup`);
       await pool.query("DELETE FROM users WHERE email = $1", [email]);
       await pool.query("DELETE FROM otp_verifications WHERE email = $1", [email]);
     }
@@ -396,6 +397,9 @@ app.post("/login", async (req, res) => {
     if (!user.is_email_verified) {
       return res.status(403).json({
         message: "Please verify your email before logging in ❌",
+        email: email,
+        requiresVerification: true,
+        hint: "You can resend OTP or register again with the same email to delete the old unverified account.",
       });
     }
 
@@ -544,6 +548,40 @@ app.get("/check", (req, res) => {
 
 
 // =======================================
+// AUTO-CLEANUP: DELETE OLD UNVERIFIED ACCOUNTS
+// =======================================
+async function cleanupUnverifiedAccounts() {
+  try {
+    // Delete accounts older than 24 hours that are not verified
+    const result = await pool.query(
+      `DELETE FROM users
+       WHERE is_email_verified = FALSE
+       AND created_at < NOW() - INTERVAL '24 hours'
+       RETURNING email`
+    );
+
+    if (result.rowCount > 0) {
+      console.log(`🗑️  Auto-cleanup: Deleted ${result.rowCount} unverified accounts older than 24 hours`);
+      result.rows.forEach(row => console.log(`   - ${row.email}`));
+
+      // Also cleanup associated OTP records
+      await pool.query(
+        `DELETE FROM otp_verifications
+         WHERE email NOT IN (SELECT email FROM users)`
+      );
+    }
+  } catch (err) {
+    console.error('❌ Auto-cleanup error:', err.message);
+  }
+}
+
+// Run cleanup every hour
+setInterval(cleanupUnverifiedAccounts, 60 * 60 * 1000);
+// Run cleanup on server start
+cleanupUnverifiedAccounts();
+
+
+// =======================================
 // 404 FALLBACK ROUTE
 // =======================================
 app.use((req, res) => {
@@ -568,4 +606,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log("📍 Profile (Protected): http://0.0.0.0:" + PORT + "/profile");
   console.log("\n⚠️  Note: /profile requires Authorization Bearer token");
   console.log("✅ PostgreSQL Connected");
+  console.log("🧹 Auto-cleanup: Unverified accounts older than 24h will be deleted hourly");
 });

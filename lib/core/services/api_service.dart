@@ -11,14 +11,16 @@ class ApiService {
   // 4. Local testing: Use 127.0.0.1:5000 or localhost:5000
 
   static String get baseUrl {
-    if (Platform.isAndroid) {
-      // Android emulator uses 10.0.2.2 to reach host localhost
-      return 'http://10.0.2.2:5000';
-    } else {
-      // Physical device or iOS simulator - use local WiFi IP
-      // For different network, change to: 100.85.59.107 (Tailscale VPN)
-      return 'http://192.168.1.8:5000';
-    }
+    // ⚠️ IMPORTANT: Change this based on your device type:
+
+    // For ANDROID EMULATOR: Use 10.0.2.2 (emulator's special alias for host)
+    // return 'http://10.0.2.2:5000';
+
+    // For PHYSICAL DEVICE on same WiFi: Use your computer's local IP
+    return 'http://192.168.1.8:5000';
+
+    // For DIFFERENT NETWORK or REMOTE: Use Tailscale VPN IP
+    // return 'http://100.85.59.107:5000';
   }
 
   late final Dio _dio;
