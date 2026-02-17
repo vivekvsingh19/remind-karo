@@ -29,11 +29,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
-    
+
     try {
       // Check if user has a saved token by fetching profile
       final result = await _authRepository.getProfileFromApi();
-      
+
       result.fold(
         (failure) {
           // No valid token or profile fetch failed - go to login
@@ -43,8 +43,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (profileData) {
           // Token exists and profile fetched successfully - restore authenticated state
           print('✅ Auth Check: Session restored, user authenticated');
-          final userProfile = UserModel.fromJson(profileData['user'] ?? profileData);
-          emit(AuthState.authenticated(userProfile: userProfile).copyWith(isLoading: false));
+          final userProfile = UserModel.fromJson(
+            profileData['user'] ?? profileData,
+          );
+          emit(
+            AuthState.authenticated(
+              userProfile: userProfile,
+            ).copyWith(isLoading: false),
+          );
         },
       );
     } catch (e) {
