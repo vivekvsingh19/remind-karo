@@ -86,92 +86,13 @@ class ProfileScreen extends StatelessWidget {
                         subtitle: 'Photo URL set',
                         onTap: null,
                       ),
-                    if (user?.createdAt != null)
-                      _buildSettingsItem(
-                        context,
-                        icon: Iconsax.calendar_1,
-                        title: 'Account Created',
-                        subtitle: _formatDate(user!.createdAt),
-                        onTap: null,
-                      ),
-                    if (user?.updatedAt != null)
-                      _buildSettingsItem(
-                        context,
-                        icon: Iconsax.edit,
-                        title: 'Last Updated',
-                        subtitle: _formatDate(user!.updatedAt),
-                        onTap: null,
-                      ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                // Settings section
-                _buildSection(
-                  context,
-                  title: 'Settings',
-                  children: [
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.notification,
-                      title: 'Notifications',
-                      subtitle: 'Manage notification preferences',
-                      onTap: () {
-                        // TODO: Navigate to notification settings
-                      },
-                    ),
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.message,
-                      title: 'WhatsApp Templates',
-                      subtitle: 'Customize message templates',
-                      onTap: () {
-                        // TODO: Navigate to template settings
-                      },
-                    ),
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.moon,
-                      title: 'Appearance',
-                      subtitle: 'Theme and display settings',
-                      onTap: () {
-                        // TODO: Navigate to appearance settings
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+
+                const SizedBox(height: 44),
+
                 // Support section
-                _buildSection(
-                  context,
-                  title: 'Support',
-                  children: [
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.info_circle,
-                      title: 'Help & FAQ',
-                      onTap: () {
-                        // TODO: Navigate to help
-                      },
-                    ),
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.shield_tick,
-                      title: 'Privacy Policy',
-                      onTap: () {
-                        // TODO: Open privacy policy
-                      },
-                    ),
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.document_text,
-                      title: 'Terms of Service',
-                      onTap: () {
-                        // TODO: Open terms
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
+
                 // Logout button
                 SizedBox(
                   width: double.infinity,

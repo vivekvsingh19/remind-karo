@@ -22,11 +22,11 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
-    DashboardScreen(),        // Index 0
-    NotificationsScreen(),    // Index 1
-    SizedBox(),               // Index 2 - placeholder for centered FAB
-    ManageRemindersScreen(),  // Index 3
-    ProfileScreen(),          // Index 4
+    DashboardScreen(), // Index 0
+    NotificationsScreen(), // Index 1
+    SizedBox(), // Index 2 - placeholder for centered FAB
+    ManageRemindersScreen(), // Index 3
+    ProfileScreen(), // Index 4
   ];
 
   @override

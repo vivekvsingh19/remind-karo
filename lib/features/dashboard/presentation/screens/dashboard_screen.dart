@@ -24,7 +24,9 @@ class DashboardScreen extends StatelessWidget {
             final authState = context.read<AuthBloc>().state;
             if (authState.isAuthenticated) {
               context.read<ReminderBloc>().add(
-                ReminderStatsLoadRequested(userId: authState.userProfile?.id ?? ''),
+                ReminderStatsLoadRequested(
+                  userId: authState.userProfile?.id ?? '',
+                ),
               );
             }
           },
@@ -50,18 +52,6 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddReminderScreen()),
-          );
-        },
-        icon: const Icon(Iconsax.add),
-        label: const Text('Add Reminder'),
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
       ),
     );
   }
