@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/widgets/common_widgets.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/models/notification_model.dart';
 import '../bloc/notification_bloc.dart';
 
@@ -18,54 +17,44 @@ class NotificationsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, authState) {
-              if (authState.firebaseUser == null) {
-                return const SizedBox.shrink();
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              // TODO: Implement notification actions with API
+              if (value == 'mark_all_read') {
+                // Mark all as read via API
+              } else if (value == 'clear_all') {
+                _showClearAllDialog(context);
               }
-
-              return PopupMenuButton<String>(
-                onSelected: (value) {
-                  final userId = authState.firebaseUser!.uid;
-                  if (value == 'mark_all_read') {
-                    context.read<NotificationBloc>().add(
-                      NotificationMarkAllAsReadRequested(userId: userId),
-                    );
-                  } else if (value == 'clear_all') {
-                    _showClearAllDialog(context, userId);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'mark_all_read',
-                    child: Row(
-                      children: [
-                        Icon(Icons.done_all, size: 20),
-                        SizedBox(width: 12),
-                        Text('Mark all as read'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'clear_all',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_sweep,
-                          size: 20,
-                          color: AppTheme.errorColor,
-                        ),
-                        SizedBox(width: 12),
-                        Text(
-                          'Clear all',
-                          style: TextStyle(color: AppTheme.errorColor),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
             },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'mark_all_read',
+                child: Row(
+                  children: [
+                    Icon(Icons.done_all, size: 20),
+                    SizedBox(width: 12),
+                    Text('Mark all as read'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear_all',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_sweep,
+                      size: 20,
+                      color: AppTheme.errorColor,
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Clear all',
+                      style: TextStyle(color: AppTheme.errorColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -132,7 +121,7 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  void _showClearAllDialog(BuildContext context, String userId) {
+  void _showClearAllDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -147,9 +136,7 @@ class NotificationsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.read<NotificationBloc>().add(
-                NotificationClearAllRequested(userId: userId),
-              );
+              // TODO: Implement clear all via API
               Navigator.pop(dialogContext);
             },
             child: const Text(

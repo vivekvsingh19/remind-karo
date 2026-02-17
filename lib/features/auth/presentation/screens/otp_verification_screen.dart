@@ -84,7 +84,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           if (!state.isLoading && _isSubmitting) {
             setState(() => _isSubmitting = false);
           }
-          
+
           // Show error if OTP verification or login fails
           if (state.error != null && state.error!.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +94,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
             );
           }
-          
+
           // Navigate to main screen on successful authentication
           if (state.step == AuthStep.authenticated && !state.isLoading) {
             // Pop all routes back to root, main.dart will navigate to MainScreen

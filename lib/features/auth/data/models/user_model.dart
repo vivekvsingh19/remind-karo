@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 /// User model representing a registered user
@@ -21,47 +20,21 @@ class UserModel extends Equatable {
     required this.updatedAt,
   });
 
-  /// Create UserModel from Firestore document
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return UserModel(
-      id: doc.id,
-      name: data['name'] ?? '',
-      phoneNumber: data['phoneNumber'] ?? '',
-      email: data['email'],
-      photoUrl: data['photoUrl'],
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    );
-  }
-
   /// Create UserModel from JSON map
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
-      phoneNumber: json['phoneNumber'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? json['mobile_number'] ?? '',
       email: json['email'],
       photoUrl: json['photoUrl'],
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+          ? DateTime.parse(json['updatedAt'] as String)
           : DateTime.now(),
     );
-  }
-
-  /// Convert UserModel to Firestore map
-  Map<String, dynamic> toFirestore() {
-    return {
-      'name': name,
-      'phoneNumber': phoneNumber,
-      'email': email,
-      'photoUrl': photoUrl,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-    };
   }
 
   /// Convert UserModel to JSON map

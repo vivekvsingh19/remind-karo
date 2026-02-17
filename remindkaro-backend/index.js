@@ -120,14 +120,14 @@ app.post("/signup", async (req, res) => {
 
     if (existingUser.rows.length > 0) {
       const user = existingUser.rows[0];
-      
+
       // If email is already verified, don't allow re-signup
       if (user.is_email_verified) {
         return res.status(400).json({
           message: "Email already registered ❌",
         });
       }
-      
+
       // If email not verified, delete old record and allow re-signup
       await pool.query("DELETE FROM users WHERE email = $1", [email]);
       await pool.query("DELETE FROM otp_verifications WHERE email = $1", [email]);
@@ -391,7 +391,7 @@ app.post("/login", async (req, res) => {
     }
 
     const user = userResult.rows[0];
-    
+
     // Check if email is verified
     if (!user.is_email_verified) {
       return res.status(403).json({
@@ -560,11 +560,12 @@ app.use((req, res) => {
 // =======================================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log("\n🚀 Server running on port", PORT);
-  console.log("📍 Root: http://localhost:" + PORT + "/");
-  console.log("📍 Test DB: http://localhost:" + PORT + "/test-db");
-  console.log("📍 Check: http://localhost:" + PORT + "/check");
-  console.log("📍 Profile (Protected): http://localhost:" + PORT + "/profile");
+  console.log("📍 Root: http://0.0.0.0:" + PORT + "/");
+  console.log("📍 Test DB: http://0.0.0.0:" + PORT + "/test-db");
+  console.log("📍 Check: http://0.0.0.0:" + PORT + "/check");
+  console.log("📍 Profile (Protected): http://0.0.0.0:" + PORT + "/profile");
   console.log("\n⚠️  Note: /profile requires Authorization Bearer token");
+  console.log("✅ PostgreSQL Connected");
 });

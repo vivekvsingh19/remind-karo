@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 
@@ -10,26 +9,19 @@ import '../models/reminder_model.dart';
 
 /// Repository for reminder operations
 class ReminderRepository {
-  final FirebaseFirestore _firestore;
   final NotificationService _notificationService;
   final WhatsAppService _whatsAppService;
   final Uuid _uuid;
 
   ReminderRepository({
-    FirebaseFirestore? firestore,
     NotificationService? notificationService,
     WhatsAppService? whatsAppService,
     Uuid? uuid,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _notificationService = notificationService ?? NotificationService(),
+  }) : _notificationService = notificationService ?? NotificationService(),
        _whatsAppService = whatsAppService ?? WhatsAppService(),
        _uuid = uuid ?? const Uuid();
 
-  /// Collection reference
-  CollectionReference<Map<String, dynamic>> get _remindersRef =>
-      _firestore.collection(AppConstants.remindersCollection);
-
-  /// Create a new reminder
+  /// Create a new reminder via API
   Future<Either<Failure, ReminderModel>> createReminder({
     required String userId,
     required ReminderCategory category,
@@ -72,7 +64,8 @@ class ReminderRepository {
         updatedAt: now,
       );
 
-      await _remindersRef.doc(id).set(reminder.toFirestore());
+      // TODO: Call backend API to create reminder
+      // await _apiService.createReminder(reminder.toJson());
 
       // Schedule alarm notification if enabled
       if (hasAlarm && alarmTime != null) {
@@ -80,23 +73,20 @@ class ReminderRepository {
       }
 
       return Right(reminder);
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Update an existing reminder
+  /// Update an existing reminder via API
   Future<Either<Failure, ReminderModel>> updateReminder(
     ReminderModel reminder,
   ) async {
     try {
       final updatedReminder = reminder.copyWith(updatedAt: DateTime.now());
 
-      await _remindersRef
-          .doc(reminder.id)
-          .update(updatedReminder.toFirestore());
+      // TODO: Call backend API to update reminder
+      // await _apiService.updateReminder(updatedReminder.toJson());
 
       // Update alarm notification if needed
       if (updatedReminder.hasAlarm && updatedReminder.alarmTime != null) {
@@ -107,194 +97,108 @@ class ReminderRepository {
       }
 
       return Right(updatedReminder);
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Delete a reminder
+  /// Delete a reminder via API
   Future<Either<Failure, void>> deleteReminder(String reminderId) async {
     try {
-      await _remindersRef.doc(reminderId).delete();
+      // TODO: Call backend API to delete reminder
+      // await _apiService.deleteReminder(reminderId);
+
       await _notificationService.cancelNotification(reminderId.hashCode);
       return const Right(null);
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Get a single reminder by ID
+  /// Get a single reminder by ID from API
   Future<Either<Failure, ReminderModel?>> getReminder(String reminderId) async {
     try {
-      final docSnapshot = await _remindersRef.doc(reminderId).get();
+      // TODO: Call backend API to get reminder
+      // final response = await _apiService.getReminder(reminderId);
+      // return Right(ReminderModel.fromJson(response));
 
-      if (!docSnapshot.exists) {
-        return const Right(null);
-      }
-
-      return Right(ReminderModel.fromFirestore(docSnapshot));
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Get all reminders for a user
+  /// Get all reminders for a user from API
   Stream<List<ReminderModel>> getRemindersStream(String userId) {
-    return _remindersRef
-        .where('userId', isEqualTo: userId)
-        .orderBy('scheduledTime', descending: false)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ReminderModel.fromFirestore(doc))
-              .toList(),
-        );
+    // TODO: Implement streaming from API or use local cache
+    // For now, return empty stream
+    return Stream.value([]);
   }
 
-  /// Get reminders filtered by category
+  /// Get reminders filtered by category from API
   Stream<List<ReminderModel>> getRemindersByCategoryStream(
     String userId,
     ReminderCategory category,
   ) {
-    return _remindersRef
-        .where('userId', isEqualTo: userId)
-        .where('category', isEqualTo: category.value)
-        .orderBy('scheduledTime', descending: false)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ReminderModel.fromFirestore(doc))
-              .toList(),
-        );
+    // TODO: Implement streaming from API or use local cache
+    // For now, return empty stream
+    return Stream.value([]);
   }
 
-  /// Get reminders filtered by status
+  /// Get reminders filtered by status from API
   Stream<List<ReminderModel>> getRemindersByStatusStream(
     String userId,
     ReminderStatus status,
   ) {
-    return _remindersRef
-        .where('userId', isEqualTo: userId)
-        .where('status', isEqualTo: status.value)
-        .orderBy('scheduledTime', descending: false)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ReminderModel.fromFirestore(doc))
-              .toList(),
-        );
+    // TODO: Implement streaming from API or use local cache
+    // For now, return empty stream
+    return Stream.value([]);
   }
 
-  /// Get reminder stats for dashboard
+  /// Get reminder stats for dashboard from API
   Future<Either<Failure, ReminderStats>> getReminderStats(String userId) async {
     try {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      // TODO: Call backend API to get stats
+      // final response = await _apiService.getReminderStats(userId);
+      // final reminders = (response as List)
+      //     .map((r) => ReminderModel.fromJson(r))
+      //     .toList();
 
-      final querySnapshot = await _remindersRef
-          .where('userId', isEqualTo: userId)
-          .where(
-            'createdAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-          )
-          .where(
-            'createdAt',
-            isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth),
-          )
-          .get();
-
-      final reminders = querySnapshot.docs
-          .map((doc) => ReminderModel.fromFirestore(doc))
-          .toList();
-
-      final pending = reminders
-          .where((r) => r.status == ReminderStatus.pending)
-          .length;
-      final sent = reminders
-          .where((r) => r.status == ReminderStatus.sent)
-          .length;
-      final completed = reminders
-          .where((r) => r.status == ReminderStatus.completed)
-          .length;
-      final overdue = reminders.where((r) => r.isOverdue).length;
-
-      return Right(
-        ReminderStats(
-          total: reminders.length,
-          pending: pending,
-          sent: sent,
-          completed: completed,
-          overdue: overdue,
-        ),
+      return const Right(
+        ReminderStats.empty,
       );
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Mark reminder as sent (after WhatsApp message is sent)
+  /// Mark reminder as sent via API
   Future<Either<Failure, ReminderModel>> markAsSent(String reminderId) async {
     try {
-      final docSnapshot = await _remindersRef.doc(reminderId).get();
+      // TODO: Call backend API to mark as sent
+      // await _apiService.markReminderAsSent(reminderId);
 
-      if (!docSnapshot.exists) {
-        return const Left(FirestoreFailure(message: 'Reminder not found'));
-      }
-
-      final reminder = ReminderModel.fromFirestore(docSnapshot);
-      final updatedReminder = reminder.copyWith(
-        status: ReminderStatus.sent,
-        updatedAt: DateTime.now(),
-      );
-
-      await _remindersRef.doc(reminderId).update(updatedReminder.toFirestore());
-
-      return Right(updatedReminder);
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
+      return Left(ServerFailure(message: 'Not implemented'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Mark reminder as completed
+  /// Mark reminder as completed via API
   Future<Either<Failure, ReminderModel>> markAsCompleted(
     String reminderId,
   ) async {
     try {
-      final docSnapshot = await _remindersRef.doc(reminderId).get();
+      // TODO: Call backend API to mark as completed
+      // await _apiService.markReminderAsCompleted(reminderId);
 
-      if (!docSnapshot.exists) {
-        return const Left(FirestoreFailure(message: 'Reminder not found'));
-      }
-
-      final reminder = ReminderModel.fromFirestore(docSnapshot);
-      final updatedReminder = reminder.copyWith(
-        status: ReminderStatus.completed,
-        updatedAt: DateTime.now(),
-      );
-
-      await _remindersRef.doc(reminderId).update(updatedReminder.toFirestore());
-
-      return Right(updatedReminder);
-    } on FirebaseException catch (e) {
-      return Left(FirestoreFailure.fromCode(e.code));
+      return Left(ServerFailure(message: 'Not implemented'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Send WhatsApp reminder (mock implementation)
-  /// TODO: Replace with actual WhatsApp Business API integration
+  /// Send WhatsApp reminder
   Future<Either<Failure, void>> sendWhatsAppReminder(
     ReminderModel reminder,
   ) async {

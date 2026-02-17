@@ -30,11 +30,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill email from auth state
-    final authState = context.read<AuthBloc>().state;
-    if (authState.firebaseUser?.email != null) {
-      // Email is already available from Firebase user
-    }
+    // Pre-fill email from auth state (if available)
   }
 
   @override
@@ -254,9 +250,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   void _submitProfile() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final authState = context.read<AuthBloc>().state;
-    final email = authState.firebaseUser?.email;
-
     context.read<AuthBloc>().add(
       AuthCreateProfileRequested(
         name: _nameController.text.trim(),
@@ -264,7 +257,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ? _phoneController.text.trim()
             : '0000000000', // Default if not provided
         // TODO: Handle image upload in Bloc
-        email: email,
+        email: null,
       ),
     );
   }

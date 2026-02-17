@@ -4,14 +4,19 @@ import 'dart:io';
 
 /// API service for backend communication
 class ApiService {
-  // For physical device: Use your computer's local IP address
-  // For emulator: Use 10.0.2.2
+  // Configuration options for different environments:
+  // 1. Same WiFi Network (192.168.1.x): Use 192.168.1.8:5000
+  // 2. Android Emulator: Use 10.0.2.2:5000
+  // 3. Different Network/Mobile Data: Use Tailscale IP or public IP
+  // 4. Local testing: Use 127.0.0.1:5000 or localhost:5000
+  
   static String get baseUrl {
     if (Platform.isAndroid) {
       // Android emulator uses 10.0.2.2 to reach host localhost
       return 'http://10.0.2.2:5000';
     } else {
-      // Physical device or iOS simulator
+      // Physical device or iOS simulator - use local WiFi IP
+      // For different network, change to: 100.85.59.107 (Tailscale VPN)
       return 'http://192.168.1.8:5000';
     }
   }
@@ -24,11 +29,12 @@ class ApiService {
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
         headers: {'Content-Type': 'application/json'},
       ),
     );
 
-    // Add interceptor for token
+    // Add interceptor for token and error handling
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {

@@ -21,7 +21,24 @@ class AddReminderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    final userId = authState.firebaseUser?.uid ?? '';
+    final userId = authState.userProfile?.id;
+    
+    // Check if user is authenticated with valid ID
+    if (userId == null || userId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Add Reminder')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text('Please login to add reminders'),
+            ],
+          ),
+        ),
+      );
+    }
 
     return BlocProvider(
       create: (context) {
@@ -789,10 +806,10 @@ class _AddReminderContentState extends State<_AddReminderContent> {
       if (success && mounted) {
         // Refresh reminders
         final authBloc = context.read<AuthBloc>();
-        if (authBloc.state.firebaseUser != null) {
+        if (authBloc.state.isAuthenticated) {
           context.read<ReminderBloc>().add(
             ReminderStatsLoadRequested(
-              userId: authBloc.state.firebaseUser!.uid,
+              userId: authBloc.state.userProfile?.id ?? '',
             ),
           );
         }

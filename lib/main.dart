@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,14 +13,10 @@ import 'features/notifications/data/repositories/notification_repository.dart';
 import 'features/notifications/presentation/bloc/notification_bloc.dart';
 import 'features/reminders/data/repositories/reminder_repository.dart';
 import 'features/reminders/presentation/bloc/reminder_bloc.dart';
-import 'firebase_options.dart';
 import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize notification service
   await NotificationService().initialize();
@@ -99,21 +94,7 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        // Subscribe to reminders and notifications when authenticated
-        // Only if using Firebase auth (firebaseUser is not null)
-        if (state.isAuthenticated && state.firebaseUser != null) {
-          final userId = state.firebaseUser!.uid;
-          context.read<ReminderBloc>().add(
-            RemindersSubscriptionRequested(userId: userId),
-          );
-          context.read<ReminderBloc>().add(
-            ReminderStatsLoadRequested(userId: userId),
-          );
-          context.read<NotificationBloc>().add(
-            NotificationsSubscriptionRequested(userId: userId),
-          );
-        }
-        // For backend API auth (without Firebase), we'll add subscriptions later when needed
+        // Using backend API auth - subscriptions handled by API
       },
       builder: (context, state) {
         if (state.isLoading) {

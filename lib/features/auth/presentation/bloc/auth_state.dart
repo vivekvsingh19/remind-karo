@@ -17,7 +17,6 @@ class AuthState extends Equatable {
   final String? error;
   final String? verificationId;
   final String? phoneNumber;
-  final User? firebaseUser;
   final UserModel? userProfile;
 
   const AuthState({
@@ -26,7 +25,6 @@ class AuthState extends Equatable {
     this.error,
     this.verificationId,
     this.phoneNumber,
-    this.firebaseUser,
     this.userProfile,
   });
 
@@ -35,12 +33,10 @@ class AuthState extends Equatable {
 
   /// Authenticated state
   factory AuthState.authenticated({
-    required User firebaseUser,
     required UserModel userProfile,
   }) {
     return AuthState(
       step: AuthStep.authenticated,
-      firebaseUser: firebaseUser,
       userProfile: userProfile,
     );
   }
@@ -53,7 +49,6 @@ class AuthState extends Equatable {
       error: null,
       verificationId: verificationId,
       phoneNumber: phoneNumber,
-      firebaseUser: firebaseUser,
       userProfile: userProfile,
     );
   }
@@ -65,7 +60,6 @@ class AuthState extends Equatable {
     String? error,
     String? verificationId,
     String? phoneNumber,
-    User? firebaseUser,
     UserModel? userProfile,
     bool clearError = false,
   }) {
@@ -75,7 +69,6 @@ class AuthState extends Equatable {
       error: clearError ? null : (error ?? this.error),
       verificationId: verificationId ?? this.verificationId,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      firebaseUser: firebaseUser ?? this.firebaseUser,
       userProfile: userProfile ?? this.userProfile,
     );
   }
@@ -90,7 +83,6 @@ class AuthState extends Equatable {
     error,
     verificationId,
     phoneNumber,
-    firebaseUser?.uid,
     userProfile,
   ];
 }

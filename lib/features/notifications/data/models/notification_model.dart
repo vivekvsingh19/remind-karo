@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 /// Notification model for in-app notification center
@@ -23,32 +22,20 @@ class NotificationModel extends Equatable {
     required this.createdAt,
   });
 
-  /// Create NotificationModel from Firestore document
-  factory NotificationModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  /// Create NotificationModel from JSON map
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: doc.id,
-      userId: data['userId'] ?? '',
-      title: data['title'] ?? '',
-      body: data['body'] ?? '',
-      type: NotificationType.fromString(data['type'] ?? 'general'),
-      relatedId: data['relatedId'],
-      isRead: data['isRead'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      id: json['id'] ?? '',
+      userId: json['userId'] ?? '',
+      title: json['title'] ?? '',
+      body: json['body'] ?? '',
+      type: NotificationType.fromString(json['type'] ?? 'general'),
+      relatedId: json['relatedId'],
+      isRead: json['isRead'] ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
     );
-  }
-
-  /// Convert NotificationModel to Firestore map
-  Map<String, dynamic> toFirestore() {
-    return {
-      'userId': userId,
-      'title': title,
-      'body': body,
-      'type': type.value,
-      'relatedId': relatedId,
-      'isRead': isRead,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
   }
 
   /// Create a copy with modified fields

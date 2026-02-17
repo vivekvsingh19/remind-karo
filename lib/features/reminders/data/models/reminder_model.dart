@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/constants/app_constants.dart';
@@ -36,28 +35,6 @@ class ReminderModel extends Equatable {
     required this.createdAt,
     required this.updatedAt,
   });
-
-  /// Create ReminderModel from Firestore document
-  factory ReminderModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return ReminderModel(
-      id: doc.id,
-      userId: data['userId'] ?? '',
-      category: ReminderCategory.fromString(data['category'] ?? 'payment'),
-      customerName: data['customerName'] ?? '',
-      customerPhone: data['customerPhone'] ?? '',
-      notes: data['notes'],
-      description: data['description'] ?? '',
-      message: data['message'] ?? '',
-      scheduledTime:
-          (data['scheduledTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: ReminderStatus.fromString(data['status'] ?? 'pending'),
-      hasAlarm: data['hasAlarm'] ?? false,
-      alarmTime: (data['alarmTime'] as Timestamp?)?.toDate(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    );
-  }
 
   /// Create ReminderModel from JSON map
   factory ReminderModel.fromJson(Map<String, dynamic> json) {
@@ -97,12 +74,12 @@ class ReminderModel extends Equatable {
       'notes': notes,
       'description': description,
       'message': message,
-      'scheduledTime': Timestamp.fromDate(scheduledTime),
+      'scheduledTime': scheduledTime.toIso8601String(),
       'status': status.value,
       'hasAlarm': hasAlarm,
-      'alarmTime': alarmTime != null ? Timestamp.fromDate(alarmTime!) : null,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      'alarmTime': alarmTime?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 

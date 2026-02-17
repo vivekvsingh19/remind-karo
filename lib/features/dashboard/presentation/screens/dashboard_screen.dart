@@ -22,10 +22,9 @@ class DashboardScreen extends StatelessWidget {
         child: RefreshIndicator(
           onRefresh: () async {
             final authState = context.read<AuthBloc>().state;
-            if (authState.firebaseUser != null) {
-              final userId = authState.firebaseUser!.uid;
+            if (authState.isAuthenticated) {
               context.read<ReminderBloc>().add(
-                ReminderStatsLoadRequested(userId: userId),
+                ReminderStatsLoadRequested(userId: authState.userProfile?.id ?? ''),
               );
             }
           },
