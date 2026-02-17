@@ -112,16 +112,25 @@ app.post("/signup", async (req, res) => {
       });
     }
 
-    // Check if user exists
+    // Check if user exists and is verified
     const existingUser = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
 
     if (existingUser.rows.length > 0) {
-      return res.status(400).json({
-        message: "Email already registered ❌",
-      });
+      const user = existingUser.rows[0];
+      
+      // If email is already verified, don't allow re-signup
+      if (user.is_email_verified) {
+        return res.status(400).json({
+          message: "Email already registered ❌",
+        });
+      }
+      
+      // If email not verified, delete old record and allow re-signup
+      await pool.query("DELETE FROM users WHERE email = $1", [email]);
+      await pool.query("DELETE FROM otp_verifications WHERE email = $1", [email]);
     }
 
     // Hash password
@@ -382,6 +391,13 @@ app.post("/login", async (req, res) => {
     }
 
     const user = userResult.rows[0];
+    
+    // Check if email is verified
+    if (!user.is_email_verified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in ❌",
+      });
+    }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);

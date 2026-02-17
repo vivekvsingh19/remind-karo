@@ -1,11 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 /// API service for backend communication
 class ApiService {
   // For physical device: Use your computer's local IP address
   // For emulator: Use 10.0.2.2
-  static const String baseUrl = 'http://192.168.1.8:5000';
+  static String get baseUrl {
+    if (Platform.isAndroid) {
+      // Android emulator uses 10.0.2.2 to reach host localhost
+      return 'http://10.0.2.2:5000';
+    } else {
+      // Physical device or iOS simulator
+      return 'http://192.168.1.8:5000';
+    }
+  }
+
   late final Dio _dio;
 
   ApiService() {
@@ -182,7 +192,7 @@ class ApiService {
         return 'Request send timeout. Check your internet connection.';
       case DioExceptionType.connectionError:
         return 'Cannot connect to server.\n'
-            'Backend: http://192.168.1.8:5000\n'
+            'Backend: $baseUrl\n'
             'Check if backend is running and accessible.';
       default:
         return 'Error: ${e.message ?? "Unknown error"}';

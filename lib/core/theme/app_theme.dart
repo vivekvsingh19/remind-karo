@@ -7,9 +7,9 @@ class AppTheme {
 
   // Primary Colors
   // Primary Colors
-  static const Color primaryColor = Color(0xFFF2821D); // Orange
-  static const Color primaryDark = Color(0xFFC2610F);
-  static const Color primaryLight = Color(0xFFFF9E45);
+  static const Color primaryColor = Color(0xFFFEB40D); // Golden Yellow
+  static const Color primaryDark = Color(0xFFE59A00);
+  static const Color primaryLight = Color(0xFFFFC93D);
 
   // Secondary Colors
   static const Color secondaryColor = Color(0xFF000000);

@@ -65,9 +65,8 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
           );
-        } else if (state.step == AuthStep.authenticated) {
-          Navigator.of(context).pop();
         }
+        // Removed: else if (state.step == AuthStep.authenticated) - OTP screen handles this now
       },
       child: Scaffold(
         appBar: AppBar(
@@ -124,17 +123,6 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         const SizedBox(height: 20),
 
-        // Email field
-        CustomTextField(
-          controller: _emailController,
-          labelText: 'Email',
-          hintText: 'Enter your email',
-          prefixIcon: Iconsax.sms,
-          keyboardType: TextInputType.emailAddress,
-          validator: Validators.validateEmail,
-        ),
-        const SizedBox(height: 20),
-
         // Mobile Number field
         CustomTextField(
           controller: _mobileController,
@@ -151,6 +139,17 @@ class _SignupScreenState extends State<SignupScreen> {
             }
             return null;
           },
+        ),
+        const SizedBox(height: 20),
+
+        // Email field
+        CustomTextField(
+          controller: _emailController,
+          labelText: 'Email',
+          hintText: 'Enter your email',
+          prefixIcon: Iconsax.sms,
+          keyboardType: TextInputType.emailAddress,
+          validator: Validators.validateEmail,
         ),
         const SizedBox(height: 20),
 

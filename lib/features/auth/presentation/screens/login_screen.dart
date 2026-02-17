@@ -94,26 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Image.asset(
-            'assets/icons/remindkaro.png',
-            width: 48,
-            height: 48,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(
-                Icons.notifications_active_rounded,
-                size: 48,
-                color: Colors.white,
-              );
-            },
-          ),
-        ),
+        Image.asset('assets/icons/remindkaro.png', width: 100, height: 100),
         const SizedBox(height: 24),
         Text(
           'Welcome to RemindKaro',

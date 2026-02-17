@@ -100,6 +100,7 @@ class AuthWrapper extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         // Subscribe to reminders and notifications when authenticated
+        // Only if using Firebase auth (firebaseUser is not null)
         if (state.isAuthenticated && state.firebaseUser != null) {
           final userId = state.firebaseUser!.uid;
           context.read<ReminderBloc>().add(
@@ -112,6 +113,7 @@ class AuthWrapper extends StatelessWidget {
             NotificationsSubscriptionRequested(userId: userId),
           );
         }
+        // For backend API auth (without Firebase), we'll add subscriptions later when needed
       },
       builder: (context, state) {
         if (state.isLoading) {
