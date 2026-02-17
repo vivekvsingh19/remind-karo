@@ -32,13 +32,8 @@ class AuthState extends Equatable {
   factory AuthState.initial() => const AuthState();
 
   /// Authenticated state
-  factory AuthState.authenticated({
-    required UserModel userProfile,
-  }) {
-    return AuthState(
-      step: AuthStep.authenticated,
-      userProfile: userProfile,
-    );
+  factory AuthState.authenticated({required UserModel userProfile}) {
+    return AuthState(step: AuthStep.authenticated, userProfile: userProfile);
   }
 
   /// Loading state

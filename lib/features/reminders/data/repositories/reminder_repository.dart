@@ -164,9 +164,7 @@ class ReminderRepository {
       //     .map((r) => ReminderModel.fromJson(r))
       //     .toList();
 
-      return const Right(
-        ReminderStats.empty,
-      );
+      return const Right(ReminderStats.empty);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

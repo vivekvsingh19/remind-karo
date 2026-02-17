@@ -9,7 +9,7 @@ class ApiService {
   // 2. Android Emulator: Use 10.0.2.2:5000
   // 3. Different Network/Mobile Data: Use Tailscale IP or public IP
   // 4. Local testing: Use 127.0.0.1:5000 or localhost:5000
-  
+
   static String get baseUrl {
     if (Platform.isAndroid) {
       // Android emulator uses 10.0.2.2 to reach host localhost

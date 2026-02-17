@@ -140,20 +140,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (response) {
         // Login successful - token is already saved in API service
         print('✅ Login successful, fetching user profile');
-        
+
         // Create a user profile from the login response
         final userProfile = UserModel(
           id: response['id'] ?? response['userId'] ?? '',
           name: response['name'] ?? '',
-          phoneNumber: response['mobile_number'] ?? response['phoneNumber'] ?? '',
+          phoneNumber:
+              response['mobile_number'] ?? response['phoneNumber'] ?? '',
           email: response['email'],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        
-        emit(
-          AuthState.authenticated(userProfile: userProfile),
-        );
+
+        emit(AuthState.authenticated(userProfile: userProfile));
       },
     );
   }
@@ -181,4 +180,3 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 }
-

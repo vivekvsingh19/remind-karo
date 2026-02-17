@@ -22,7 +22,7 @@ class AddReminderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
     final userId = authState.userProfile?.id;
-    
+
     // Check if user is authenticated with valid ID
     if (userId == null || userId.isEmpty) {
       return Scaffold(
