@@ -633,7 +633,7 @@ app.post("/forgot-password/verify-otp", async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT * FROM otp_verifications 
+      `SELECT * FROM otp_verifications
        WHERE email = $1 AND otp = $2 AND type = 'password_reset'
        ORDER BY created_at DESC LIMIT 1`,
       [email, otp]
