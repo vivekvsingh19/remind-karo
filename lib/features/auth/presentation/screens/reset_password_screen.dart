@@ -12,10 +12,7 @@ import 'login_screen.dart';
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
 
-  const ResetPasswordScreen({
-    super.key,
-    required this.email,
-  });
+  const ResetPasswordScreen({super.key, required this.email});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -73,9 +70,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
           title: Text(
             'Create New Password',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
         ),
@@ -122,17 +119,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         const SizedBox(height: 24),
         Text(
           'Create New Password',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
           'Enter a new password for your account',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.textSecondaryLight,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
           textAlign: TextAlign.center,
         ),
       ],
@@ -224,7 +221,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     // Pass email and new password to backend
     final password = _passwordController.text;
     assert(password.isNotEmpty, 'Password should not be empty');
-    
+
     // Uncomment below when implementing reset password event:
     // context.read<AuthBloc>().add(
     //   AuthResetPasswordRequested(
@@ -232,11 +229,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     //     newPassword: password,
     //   ),
     // );
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Resetting password for ${widget.email}...'),
-      ),
+      SnackBar(content: Text('Resetting password for ${widget.email}...')),
     );
   }
 }
