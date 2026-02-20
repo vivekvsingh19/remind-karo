@@ -75,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
                         context,
                         icon: Iconsax.document,
                         title: 'User ID',
-                        subtitle: user!.id,
+                        subtitle: user.id,
                         onTap: null,
                       ),
                     if (user?.photoUrl != null && user!.photoUrl!.isNotEmpty)

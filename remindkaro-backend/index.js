@@ -441,6 +441,308 @@ app.post("/login", async (req, res) => {
 
 
 // =======================================
+// UPDATE PROFILE ROUTE (PROTECTED)
+// =======================================
+app.put("/update-profile", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { name, mobile_number } = req.body;
+
+    if (!name && !mobile_number) {
+      return res.status(400).json({
+        message: "At least one field (name or mobile_number) is required ❌",
+      });
+    }
+
+    // Build dynamic query based on provided fields
+    const fields = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (name) {
+      fields.push(`name = $${paramIndex++}`);
+      values.push(name.trim());
+    }
+    if (mobile_number) {
+      fields.push(`mobile_number = $${paramIndex++}`);
+      values.push(mobile_number.trim());
+    }
+
+    fields.push(`updated_at = NOW()`);
+    values.push(userId);
+
+    const result = await pool.query(
+      `UPDATE users SET ${fields.join(", ")} WHERE user_id = $${paramIndex} RETURNING user_id, name, email, mobile_number`,
+      values
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "User not found ❌" });
+    }
+
+    console.log("✅ Profile updated for user_id:", userId);
+
+    res.status(200).json({
+      message: "Profile updated successfully ✅",
+      user: result.rows[0],
+    });
+
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({ message: "Server error ❌", error: err.message });
+  }
+});
+
+
+// =======================================
+// CHANGE PASSWORD ROUTE (PROTECTED)
+// =======================================
+app.put("/change-password", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({
+        message: "Current password and new password are required ❌",
+      });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({
+        message: "New password must be at least 6 characters ❌",
+      });
+    }
+
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE user_id = $1",
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found ❌" });
+    }
+
+    const user = userResult.rows[0];
+    const isMatch = await bcrypt.compare(current_password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect ❌" });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await pool.query(
+      "UPDATE users SET password = $1, updated_at = NOW() WHERE user_id = $2",
+      [hashedPassword, userId]
+    );
+
+    console.log("✅ Password changed for user_id:", userId);
+
+    res.status(200).json({ message: "Password changed successfully ✅" });
+
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ message: "Server error ❌", error: err.message });
+  }
+});
+
+
+// =======================================
+// FORGOT PASSWORD - SEND OTP ROUTE
+// =======================================
+app.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required ❌" });
+    }
+
+    // Check if user exists and is verified
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1 AND is_email_verified = TRUE",
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      // Return same message to avoid exposing whether email exists
+      return res.status(200).json({
+        message: "If this email is registered, an OTP has been sent ✅",
+      });
+    }
+
+    // Delete any old password reset OTPs for this email
+    await pool.query(
+      "DELETE FROM otp_verifications WHERE email = $1 AND type = 'password_reset'",
+      [email]
+    );
+
+    // Generate OTP
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Save OTP with type = password_reset
+    await pool.query(
+      "INSERT INTO otp_verifications (email, otp, expires_at, type) VALUES ($1, $2, $3, 'password_reset')",
+      [email, otp, expiresAt]
+    );
+
+    // Send OTP Email
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Reset your RemindKaro password",
+        html: `
+          <h2>Password Reset Request</h2>
+          <p>You requested to reset your password.</p>
+          <p>Your OTP is: <strong style="font-size:24px; letter-spacing:4px;">${otp}</strong></p>
+          <p>This OTP will expire in <strong>10 minutes</strong>.</p>
+          <p>If you did not request a password reset, please ignore this email.</p>
+          <p>Do not share this OTP with anyone.</p>
+        `,
+      });
+      console.log("✅ Password reset OTP sent to:", email);
+    } catch (emailError) {
+      console.error("❌ Email send error:", emailError.message);
+    }
+
+    res.status(200).json({
+      message: "If this email is registered, an OTP has been sent ✅",
+      // For development only - remove in production:
+      otp: process.env.NODE_ENV !== "production" ? otp : undefined,
+    });
+
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Server error ❌", error: err.message });
+  }
+});
+
+
+// =======================================
+// FORGOT PASSWORD - VERIFY OTP ROUTE
+// =======================================
+app.post("/forgot-password/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required ❌" });
+    }
+
+    const result = await pool.query(
+      `SELECT * FROM otp_verifications 
+       WHERE email = $1 AND otp = $2 AND type = 'password_reset'
+       ORDER BY created_at DESC LIMIT 1`,
+      [email, otp]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid OTP ❌" });
+    }
+
+    const record = result.rows[0];
+
+    if (new Date() > new Date(record.expires_at)) {
+      await pool.query(
+        "DELETE FROM otp_verifications WHERE email = $1 AND type = 'password_reset'",
+        [email]
+      );
+      return res.status(400).json({ message: "OTP has expired ❌" });
+    }
+
+    // Generate a short-lived reset token (valid for 15 minutes)
+    const resetToken = jwt.sign(
+      { email, purpose: "password_reset" },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // Delete used OTP
+    await pool.query(
+      "DELETE FROM otp_verifications WHERE email = $1 AND type = 'password_reset'",
+      [email]
+    );
+
+    console.log("✅ Password reset OTP verified for:", email);
+
+    res.status(200).json({
+      message: "OTP verified successfully ✅",
+      reset_token: resetToken,
+    });
+
+  } catch (err) {
+    console.error("Forgot password verify OTP error:", err);
+    res.status(500).json({ message: "Server error ❌", error: err.message });
+  }
+});
+
+
+// =======================================
+// FORGOT PASSWORD - RESET PASSWORD ROUTE
+// =======================================
+app.post("/forgot-password/reset", async (req, res) => {
+  try {
+    const { reset_token, new_password } = req.body;
+
+    if (!reset_token || !new_password) {
+      return res.status(400).json({
+        message: "Reset token and new password are required ❌",
+      });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters ❌",
+      });
+    }
+
+    // Verify reset token
+    let decoded;
+    try {
+      decoded = jwt.verify(reset_token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid or expired reset token ❌" });
+    }
+
+    if (decoded.purpose !== "password_reset") {
+      return res.status(400).json({ message: "Invalid reset token ❌" });
+    }
+
+    const email = decoded.email;
+
+    // Check user exists
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found ❌" });
+    }
+
+    // Hash new password and update
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await pool.query(
+      "UPDATE users SET password = $1, updated_at = NOW() WHERE email = $2",
+      [hashedPassword, email]
+    );
+
+    console.log("✅ Password reset successfully for:", email);
+
+    res.status(200).json({ message: "Password reset successfully ✅" });
+
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ message: "Server error ❌", error: err.message });
+  }
+});
+
+
+// =======================================
 // PROTECTED PROFILE ROUTE
 // =======================================
 app.get("/profile", authenticateToken, async (req, res) => {

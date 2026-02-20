@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
 
 /// Splash screen wrapper that shows splash first then transitions to auth
 class SplashScreenWrapper extends StatefulWidget {
