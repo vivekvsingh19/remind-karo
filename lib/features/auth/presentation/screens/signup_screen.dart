@@ -19,7 +19,8 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -29,7 +30,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
     _passwordController.dispose();
@@ -50,8 +52,10 @@ class _SignupScreenState extends State<SignupScreen> {
           );
         } else if (state.step == AuthStep.emailOtpVerification) {
           // Navigate to OTP verification screen
+          final firstName = _firstNameController.text.trim();
+          final lastName = _lastNameController.text.trim();
+          final fullName = '$firstName $lastName'.trim();
           final email = _emailController.text.trim();
-          final name = _nameController.text.trim();
           final password = _passwordController.text;
           final mobile = _mobileController.text.trim();
 
@@ -59,7 +63,7 @@ class _SignupScreenState extends State<SignupScreen> {
             MaterialPageRoute(
               builder: (_) => OtpVerificationScreen(
                 email: email,
-                name: name,
+                name: fullName,
                 password: password,
                 mobileNumber: mobile,
               ),
@@ -107,19 +111,41 @@ class _SignupScreenState extends State<SignupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Name field
-        CustomTextField(
-          controller: _nameController,
-          labelText: 'Full Name',
-          hintText: 'Enter your full name',
-          prefixIcon: Iconsax.user,
-          keyboardType: TextInputType.name,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter your name';
-            }
-            return null;
-          },
+        // First Name and Last Name fields (Horizontal)
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: _firstNameController,
+                labelText: 'First Name',
+                hintText: 'Enter first name',
+                prefixIcon: Iconsax.user,
+                keyboardType: TextInputType.name,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your first name';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: CustomTextField(
+                controller: _lastNameController,
+                labelText: 'Last Name',
+                hintText: 'Enter last name',
+                prefixIcon: Iconsax.user,
+                keyboardType: TextInputType.name,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your last name';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 20),
 
@@ -254,14 +280,16 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final name = _nameController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final fullName = '$firstName $lastName'.trim();
     final email = _emailController.text.trim();
     final mobile = _mobileController.text.trim();
     final password = _passwordController.text;
 
     context.read<AuthBloc>().add(
       AuthSignupRequested(
-        name: name,
+        name: fullName,
         email: email,
         password: password,
         mobileNumber: mobile,

@@ -8,6 +8,7 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../presentation/widgets/curved_container.dart';
 import '../bloc/auth_bloc.dart';
+import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
 /// Login screen with email/password authentication
@@ -102,13 +103,13 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
-        Text(
-          'WhatsApp Reminder Automation',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
+        // const SizedBox(height: 8),
+        // Text(
+        //   'WhatsApp Reminder Automation',
+        //   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        //     color: Colors.white.withValues(alpha: 0.9),
+        //   ),
+        // ),
       ],
     );
   }
@@ -134,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
               // Error message display
               if (state.error != null && state.error!.isNotEmpty)
                 Container(
@@ -206,7 +207,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
+
+              // Forgot Password link
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Forgot Password?',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
 
               // Submit button
               BlocBuilder<AuthBloc, AuthState>(
