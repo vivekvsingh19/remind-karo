@@ -47,7 +47,10 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final response = await _apiService.login(email: email, password: password);
+      final response = await _apiService.login(
+        email: email,
+        password: password,
+      );
       return Right(response);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

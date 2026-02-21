@@ -174,7 +174,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthGuestLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(state.copyWith(step: AuthStep.guest, isLoading: false, clearError: true));
+    emit(
+      state.copyWith(step: AuthStep.guest, isLoading: false, clearError: true),
+    );
   }
 
   /// Delete account
