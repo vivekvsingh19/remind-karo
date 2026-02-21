@@ -47,15 +47,9 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      print('📄 Repository: Login attempt for $email');
-      final response = await _apiService.login(
-        email: email,
-        password: password,
-      );
-      print('✅ Repository: Login successful for $email');
+      final response = await _apiService.login(email: email, password: password);
       return Right(response);
     } catch (e) {
-      print('❌ Repository: Login error for $email: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -66,12 +60,9 @@ class AuthRepository {
     required String otp,
   }) async {
     try {
-      print('📄 Repository: Verifying OTP for $email');
       final response = await _apiService.verifyOtp(email: email, otp: otp);
-      print('✅ Repository: OTP verified for $email');
       return Right(response);
     } catch (e) {
-      print('❌ Repository: OTP verification error for $email: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -81,12 +72,9 @@ class AuthRepository {
     required String email,
   }) async {
     try {
-      print('📄 Repository: Resending OTP for $email');
       final response = await _apiService.resendOtp(email: email);
-      print('✅ Repository: OTP resent for $email');
       return Right(response);
     } catch (e) {
-      print('❌ Repository: OTP resend error for $email: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -94,12 +82,9 @@ class AuthRepository {
   /// Delete account from Backend API
   Future<Either<Failure, void>> deleteAccountFromApi() async {
     try {
-      print('📄 Repository: Deleting account');
       await _apiService.deleteAccount();
-      print('✅ Repository: Account deleted');
       return const Right(null);
     } catch (e) {
-      print('❌ Repository: Account deletion error: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -107,12 +92,9 @@ class AuthRepository {
   /// Get user profile from Backend API
   Future<Either<Failure, Map<String, dynamic>>> getProfileFromApi() async {
     try {
-      print('📄 Repository: Fetching profile');
       final response = await _apiService.getProfile();
-      print('✅ Repository: Profile fetched');
       return Right(response);
     } catch (e) {
-      print('❌ Repository: Profile fetch error: $e');
       return Left(ServerFailure(message: e.toString()));
     }
   }

@@ -4,7 +4,6 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
 
 /// Profile screen showing user information and settings
 class ProfileScreen extends StatelessWidget {
@@ -16,13 +15,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Profile')),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          // Navigate to login on sign out
-          if (state.step == AuthStep.phone) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
-            );
-          }
+          // AuthWrapper handles routing automatically when step changes to phone
         },
         builder: (context, state) {
           if (state.isLoading) {
@@ -138,28 +131,6 @@ class ProfileScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _formatDate(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return '$weeks week${weeks > 1 ? 's' : ''} ago';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return '$months month${months > 1 ? 's' : ''} ago';
-    } else {
-      final years = (difference.inDays / 365).floor();
-      return '$years year${years > 1 ? 's' : ''} ago';
-    }
   }
 
   Widget _buildProfileHeader(BuildContext context, String name) {
@@ -345,11 +316,8 @@ class ProfileScreen extends StatelessWidget {
           if (state.step == AuthStep.phone &&
               !state.isLoading &&
               state.error == null) {
+            // Close the dialog; AuthWrapper will handle routing to LoginScreen
             Navigator.pop(dialogContext);
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
-            );
           }
         },
         child: BlocBuilder<AuthBloc, AuthState>(

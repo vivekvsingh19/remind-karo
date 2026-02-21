@@ -97,13 +97,6 @@ class AuthWrapper extends StatelessWidget {
         // Using backend API auth - subscriptions handled by API
       },
       builder: (context, state) {
-        if (state.isLoading && state.step == AuthStep.phone) {
-          // Only show loading for initial auth check, not during login
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
         switch (state.step) {
           case AuthStep.authenticated:
           case AuthStep.guest:

@@ -40,6 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
           // Check if error is about unverified email
           if (state.error!.toLowerCase().contains('verify your email')) {
             _showUnverifiedAccountDialog(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error!),
+                backgroundColor: AppTheme.errorColor,
+              ),
+            );
           }
         }
       },
