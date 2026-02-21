@@ -49,6 +49,13 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddReminderScreen()),
+            );
+            return;
+          }
           setState(() {
             _currentIndex = index;
           });
