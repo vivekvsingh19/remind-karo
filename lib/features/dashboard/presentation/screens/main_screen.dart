@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
         foregroundColor: Colors.white,
         elevation: 8,
         shape: const CircleBorder(),
-        child: const Icon(Iconsax.add, size: 28),
+        child: const Icon(Iconsax.add, size: 48),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigationBar(

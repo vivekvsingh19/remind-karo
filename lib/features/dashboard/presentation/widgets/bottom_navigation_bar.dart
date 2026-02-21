@@ -39,8 +39,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         elevation: 0,
         items: [
           const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            activeIcon: Icon(Icons.home),
+            icon: Icon(Iconsax.home),
+            activeIcon: Icon(Iconsax.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
@@ -56,7 +56,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                     child: const Icon(Iconsax.notification_status),
                   );
                 }
-                return const Icon(Iconsax.notification);
+                return const Icon(Iconsax.notification_status);
               },
             ),
             activeIcon: BlocBuilder<NotificationBloc, NotificationState>(
@@ -68,21 +68,21 @@ class CustomBottomNavigationBar extends StatelessWidget {
                           ? '99+'
                           : state.unreadCount.toString(),
                     ),
-                    child: const Icon(Iconsax.notification),
+                    child: const Icon(Iconsax.notification_status),
                   );
                 }
-                return const Icon(Iconsax.notification);
+                return const Icon(Iconsax.notification_status);
               },
             ),
             label: 'Notifications',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.add, color: Colors.transparent),
+            icon: Icon(Iconsax.add3, color: Colors.transparent),
             label: '',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Iconsax.task_square),
-            activeIcon: Icon(Iconsax.task_square),
+            icon: Icon(Iconsax.setting_4),
+            activeIcon: Icon(Iconsax.setting_4),
             label: 'Manage',
           ),
           const BottomNavigationBarItem(
