@@ -7,18 +7,27 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-
 import '../../../reminders/presentation/bloc/reminder_bloc.dart';
-import '../../../reminders/presentation/screens/add_reminder_screen.dart';
+import '../../../reminders/presentation/screens/manage_reminders_screen.dart';
 
 /// Dashboard screen showing reminders overview
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  DateTime _selectedDate = DateTime.now();
+  String _successRatePeriod = '7 Days';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD), // Light background like design
+      backgroundColor: const Color(
+        0xFFFCF8F8,
+      ), // Light pinkish-white background like design
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -38,7 +47,7 @@ class DashboardScreen extends StatelessWidget {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -57,43 +66,6 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: 20,
-                child: SafeArea(
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Navigate to Manage or Add Reminder
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AddReminderScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 4,
-                      ),
-                      child: const Text(
-                        'Manage',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -111,49 +83,26 @@ class DashboardScreen extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  DateFormat('HH.mm').format(DateTime.now()), // e.g. 12.45
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black54,
-                  ),
+            RichText(
+              text: TextSpan(
+                text: 'Hello, ',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 4),
-                RichText(
-                  text: TextSpan(
-                    text: 'Hello, ',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w500,
+                children: [
+                  TextSpan(
+                    text: firstName,
+                    style: const TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
-                    children: [
-                      TextSpan(
-                        text: firstName,
-                        style: const TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.black12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Iconsax.notification, size: 24),
-                ),
-                const SizedBox(width: 12),
                 if (state.userProfile?.photoUrl != null)
                   CircleAvatar(
                     backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
@@ -174,7 +123,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildCalendar(BuildContext context) {
-    final now = DateTime.now();
+    final now = _selectedDate;
     final firstDayOfMonth = DateTime(now.year, now.month, 1);
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
 
@@ -189,7 +138,7 @@ class DashboardScreen extends StatelessWidget {
     final int offset = firstWeekday == 7 ? 0 : firstWeekday;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -199,9 +148,32 @@ class DashboardScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildDropdown(DateFormat('MMM').format(now)),
+              _buildDropdown(
+                DateFormat('MMM').format(now),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date != null) setState(() => _selectedDate = date);
+                },
+              ),
               const SizedBox(width: 8),
-              _buildDropdown(DateFormat('yyyy').format(now)),
+              _buildDropdown(
+                DateFormat('yyyy').format(now),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                    initialDatePickerMode: DatePickerMode.year,
+                  );
+                  if (date != null) setState(() => _selectedDate = date);
+                },
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -241,18 +213,35 @@ class DashboardScreen extends StatelessWidget {
                 return const SizedBox();
               }
               final day = index - offset + 1;
-              final isToday = day == now.day;
-              return Container(
-                decoration: BoxDecoration(
-                  color: isToday ? AppTheme.primaryColor : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(
-                    '$day',
-                    style: TextStyle(
-                      color: isToday ? Colors.white : Colors.black87,
-                      fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+              final isSelected = day == _selectedDate.day;
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month,
+                      day,
+                    );
+                  });
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.primaryColor
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$day',
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -273,23 +262,32 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDropdown(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          const SizedBox(width: 4),
-          const Icon(Icons.keyboard_arrow_down, size: 16),
-        ],
+  Widget _buildDropdown(String text, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.keyboard_arrow_down,
+              size: 18,
+              color: Colors.black54,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -310,33 +308,33 @@ class DashboardScreen extends StatelessWidget {
               context,
               'Total',
               stats?.total.toString() ?? '0',
-              Iconsax.chart_2,
-              Colors.blue.shade50,
-              Colors.blue,
+              Iconsax.trend_up,
+              const Color(0xFFEFF4FF),
+              const Color(0xFF5A6BCC),
             ),
             _buildStatCard(
               context,
               'Completed',
               stats?.completed.toString() ?? '0',
               Iconsax.tick_circle,
-              Colors.green.shade50,
-              Colors.green,
+              const Color(0xFFF0FDF4),
+              const Color(0xFF4ADE80),
             ),
             _buildStatCard(
               context,
               'Pending',
               stats?.pending.toString() ?? '0',
               Iconsax.clock,
-              Colors.amber.shade50,
-              Colors.amber,
+              const Color(0xFFFFFBEB),
+              const Color(0xFFFBBF24),
             ),
             _buildStatCard(
               context,
-              'Overdue', // Replaced "Negetive" with Overdue
+              'Negetive', // Keep "Negetive" as in design image
               stats?.overdue.toString() ?? '0',
               Iconsax.close_circle,
-              Colors.red.shade50,
-              Colors.red,
+              const Color(0xFFFEF2F2),
+              const Color(0xFFEF4444),
             ),
           ],
         );
@@ -362,8 +360,11 @@ class DashboardScreen extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Icon(icon, color: iconColor, size: 24),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: iconColor, size: 28),
           ),
           const SizedBox(height: 12),
           Text(
@@ -408,7 +409,28 @@ class DashboardScreen extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              _buildDropdown('7 Days'),
+              _buildDropdown(
+                _successRatePeriod,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (ctx) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: ['7 Days', '30 Days', '90 Days', '1 Year']
+                          .map(
+                            (e) => ListTile(
+                              title: Text(e),
+                              onTap: () {
+                                setState(() => _successRatePeriod = e);
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -423,152 +445,197 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildUpcomingReminders(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'UPCOMING',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
-            fontSize: 13,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'UPCOMING',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+              fontSize: 13,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        BlocBuilder<ReminderBloc, ReminderState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          const SizedBox(height: 16),
+          BlocBuilder<ReminderBloc, ReminderState>(
+            builder: (context, state) {
+              if (state.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            final upcoming = state.reminders
-                .where(
-                  (r) =>
-                      r.status == ReminderStatus.pending &&
-                      r.scheduledTime.isAfter(DateTime.now()),
-                )
-                .take(3) // Design shows 3 items
-                .toList();
+              final upcoming = state.reminders
+                  .where(
+                    (r) =>
+                        r.status == ReminderStatus.pending &&
+                        r.scheduledTime.isAfter(DateTime.now()),
+                  )
+                  .take(3) // Design shows 3 items
+                  .toList();
 
-            if (upcoming.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: Text('No upcoming reminders')),
-              );
-            }
+              if (upcoming.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: Text('No upcoming reminders')),
+                );
+              }
 
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: upcoming.length,
-              itemBuilder: (context, index) {
-                final reminder = upcoming[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 0),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Timestamp line
-                        SizedBox(
-                          width: 20,
-                          child: Column(
+              return Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: upcoming.length,
+                    itemBuilder: (context, index) {
+                      final reminder = upcoming[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Container(
-                                width: 2,
-                                height: 10,
-                                color: index == 0
-                                    ? Colors.transparent
-                                    : Colors.grey.shade300,
-                              ),
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
-                                  shape: BoxShape.circle,
+                              // Timestamp line
+                              SizedBox(
+                                width: 20,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 1.5,
+                                      height: 8,
+                                      color: index == 0
+                                          ? Colors.transparent
+                                          : Colors.grey.shade300,
+                                    ),
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade400,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        width: 1.5,
+                                        color: index != upcoming.length - 1
+                                            ? Colors.grey.shade300
+                                            : Colors.transparent,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              // Content
                               Expanded(
-                                child: Container(
-                                  width: 2,
-                                  color: index != upcoming.length - 1
-                                      ? Colors.grey.shade300
-                                      : Colors.transparent,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Content
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        reminder.customerName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: Colors.black87,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              reminder.customerName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 4,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade100,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                DashboardStringExtension(
+                                                  reminder.category.name,
+                                                ).capitalize(),
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          reminder.category.name.capitalize(),
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.grey.shade600,
-                                          ),
+                                      Text(
+                                        DateFormat('hh.mm a')
+                                            .format(reminder.scheduledTime)
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 11,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Text(
-                                  DateFormat(
-                                    'hh.mm a',
-                                  ).format(reminder.scheduledTime),
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigate to Manage Reminder
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ManageRemindersScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Manage',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                );
-              },
-            );
-          },
-        ),
-      ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -630,7 +697,7 @@ class _ChartPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-extension StringExtension on String {
+extension DashboardStringExtension on String {
   String capitalize() {
     if (isEmpty) return "";
     return "${this[0].toUpperCase()}${substring(1)}";
