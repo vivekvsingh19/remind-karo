@@ -23,7 +23,8 @@ class UserModel extends Equatable {
   /// Create UserModel from JSON map
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? '',
+      // Backend uses 'user_id' (PostgreSQL column), fallback to 'id'
+      id: (json['user_id'] ?? json['id'] ?? '').toString(),
       name: json['name'] ?? '',
       phoneNumber: json['phoneNumber'] ?? json['mobile_number'] ?? '',
       email: json['email'],

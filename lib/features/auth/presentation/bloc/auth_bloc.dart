@@ -155,12 +155,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(isLoading: false, error: failure.message));
       },
       (response) {
+        // Backend returns: { token, user: { user_id, name, email, mobile_number } }
+        final userData = response['user'] as Map<String, dynamic>? ?? response;
         final userProfile = UserModel(
-          id: response['id'] ?? response['userId'] ?? '',
-          name: response['name'] ?? '',
+          id: (userData['user_id'] ?? userData['id'] ?? '').toString(),
+          name: userData['name'] ?? '',
           phoneNumber:
-              response['mobile_number'] ?? response['phoneNumber'] ?? '',
-          email: response['email'],
+              userData['mobile_number'] ?? userData['phoneNumber'] ?? '',
+          email: userData['email'],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );

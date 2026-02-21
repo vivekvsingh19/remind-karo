@@ -76,7 +76,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildHeader(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        final name = state.userProfile?.name ?? 'User';
+        final name =
+            (state.userProfile?.name != null &&
+                state.userProfile!.name.isNotEmpty)
+            ? state.userProfile!.name
+            : 'User';
         // Get just the first name
         final firstName = name.split(' ').first;
 

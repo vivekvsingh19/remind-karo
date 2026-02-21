@@ -24,10 +24,13 @@ class ProfileScreen extends StatelessWidget {
             }
 
             final user = state.userProfile;
+            final name = (user?.name != null && user!.name.isNotEmpty)
+                ? user.name
+                : 'User';
 
             return Column(
               children: [
-                _buildTopBar(context),
+                _buildTopBar(context, name),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -41,10 +44,12 @@ class ProfileScreen extends StatelessWidget {
                         // Profile header
                         _buildProfileHeader(
                           context,
-                          user?.name ?? 'Yash Nayak',
+                          name,
                           user?.photoUrl,
+                          // email: user?.email,
+                          // phoneNumber: user?.phoneNumber,
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 20),
                         // Account section
                         Container(
                           decoration: BoxDecoration(
@@ -107,7 +112,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, String name) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
@@ -124,11 +129,14 @@ class ProfileScreen extends StatelessWidget {
             alignment: Alignment.centerLeft,
           ),
           const SizedBox(width: 8),
-          Text(
-            'Profile',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
+          Expanded(
+            child: Text(
+              name,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -149,8 +157,10 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfileHeader(
     BuildContext context,
     String name,
-    String? photoUrl,
-  ) {
+    String? photoUrl, {
+    String? email,
+    String? phoneNumber,
+  }) {
     return Center(
       child: Column(
         children: [
@@ -210,6 +220,24 @@ class ProfileScreen extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
+          if (email != null && email.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              email,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+            ),
+          ],
+          if (phoneNumber != null && phoneNumber.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              phoneNumber,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.black45),
+            ),
+          ],
         ],
       ),
     );
