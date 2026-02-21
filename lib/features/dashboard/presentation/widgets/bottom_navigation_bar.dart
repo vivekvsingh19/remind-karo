@@ -39,8 +39,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         elevation: 0,
         items: [
           const BottomNavigationBarItem(
-            icon: Icon(Iconsax.home),
-            activeIcon: Icon(Iconsax.home),
+            icon: Icon(Icons.home),
+            activeIcon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
@@ -53,7 +53,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                           ? '99+'
                           : state.unreadCount.toString(),
                     ),
-                    child: const Icon(Iconsax.notification),
+                    child: const Icon(Iconsax.notification_status),
                   );
                 }
                 return const Icon(Iconsax.notification);
@@ -76,7 +76,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
             ),
             label: 'Notifications',
           ),
-          const BottomNavigationBarItem(icon: SizedBox.shrink(), label: ''),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.add, color: Colors.transparent),
+            label: '',
+          ),
           const BottomNavigationBarItem(
             icon: Icon(Iconsax.task_square),
             activeIcon: Icon(Iconsax.task_square),

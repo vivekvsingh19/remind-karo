@@ -7,10 +7,77 @@ import '../models/notification_model.dart';
 class NotificationRepository {
   NotificationRepository();
 
-  /// Get notifications stream for a user (placeholder for API integration)
   Stream<List<NotificationModel>> getNotificationsStream(String userId) {
-    // TODO: Implement with API call
-    return Stream.value([]);
+    // Implementing realistic mock data
+    final now = DateTime.now();
+
+    final mockNotifications = [
+      NotificationModel(
+        id: '1',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: false,
+        createdAt: now.subtract(const Duration(hours: 2)), // Recent
+      ),
+      NotificationModel(
+        id: '2',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: false,
+        createdAt: now.subtract(const Duration(hours: 5)), // Recent
+      ),
+      NotificationModel(
+        id: '3',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: true, // Successful history
+        createdAt: now.subtract(const Duration(days: 2, hours: 1)), // History
+      ),
+      NotificationModel(
+        id: '4',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: true, // Successful history
+        createdAt: now.subtract(const Duration(days: 3, hours: 2)),
+      ),
+      NotificationModel(
+        id: '5',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: false, // Cancelled history equivalent
+        createdAt: now.subtract(const Duration(days: 4, hours: 3)),
+      ),
+      NotificationModel(
+        id: '6',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: true,
+        createdAt: now.subtract(const Duration(days: 5, hours: 4)),
+      ),
+      NotificationModel(
+        id: '7',
+        userId: userId,
+        title: 'Akshay Traders',
+        body: 'Scheduled meeting reminder',
+        type: NotificationType.fromString('meeting'),
+        isRead: false,
+        createdAt: now.subtract(const Duration(days: 6, hours: 5)),
+      ),
+    ];
+
+    return Stream.value(mockNotifications);
   }
 
   /// Create a notification (placeholder for API integration)

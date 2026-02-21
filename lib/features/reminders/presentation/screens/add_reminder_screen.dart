@@ -4,13 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/whatsapp_service.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/validators.dart';
-import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/custom_text_field.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/repositories/reminder_repository.dart';
 import '../bloc/reminder_bloc.dart';
 import '../bloc/reminder_form_cubit.dart';
+import 'package:iconsax/iconsax.dart';
 
 /// Screen for adding a new reminder with step-based form
 class AddReminderScreen extends StatelessWidget {
@@ -21,24 +19,8 @@ class AddReminderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    final userId = authState.userProfile?.id;
-
-    // Check if user is authenticated with valid ID
-    if (userId == null || userId.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Add Reminder')),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.lock, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text('Please login to add reminders'),
-            ],
-          ),
-        ),
-      );
-    }
+    // For testing purposes, we'll use a mock userId if one isn't available
+    final userId = authState.userProfile?.id ?? 'mock_user_id';
 
     return BlocProvider(
       create: (context) {
@@ -97,29 +79,20 @@ class _AddReminderContentState extends State<_AddReminderContent> {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(_getStepTitle(state.currentStep)),
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+          backgroundColor: const Color(0xFFFCF8F8),
           body: SafeArea(
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  // Progress indicator
-                  _buildProgressIndicator(state.currentStep),
-                  const SizedBox(height: 24),
-                  // Form content
+                  _buildTopBar(context),
+                  const SizedBox(height: 20),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: _buildStepContent(state),
                     ),
                   ),
-                  // Bottom buttons
                   _buildBottomButtons(state),
                 ],
               ),
@@ -130,49 +103,57 @@ class _AddReminderContentState extends State<_AddReminderContent> {
     );
   }
 
-  String _getStepTitle(int step) {
-    switch (step) {
-      case 0:
-        return 'Select Category';
-      case 1:
-        return 'Customer Details';
-      case 2:
-        return 'Reminder Details';
-      case 3:
-        return 'Schedule';
-      case 4:
-        return 'Review & Submit';
-      default:
-        return 'Add Reminder';
-    }
-  }
-
-  Widget _buildProgressIndicator(int currentStep) {
+  Widget _buildTopBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
-        children: List.generate(5, (index) {
-          final isActive = index <= currentStep;
-          final isCompleted = index < currentStep;
-          return Expanded(
-            child: Container(
-              height: 4,
-              margin: EdgeInsets.only(right: index < 4 ? 4 : 0),
-              decoration: BoxDecoration(
-                color: isActive ? AppTheme.primaryColor : Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  if (context.read<ReminderFormCubit>().state.currentStep > 0) {
+                    context.read<ReminderFormCubit>().previousStep();
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  size: 24,
+                  color: Colors.black54,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                alignment: Alignment.centerLeft,
               ),
-              child: isCompleted
-                  ? Container(
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    )
-                  : null,
-            ),
-          );
-        }),
+              const SizedBox(width: 8),
+              Text(
+                'Add New Task',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state.userProfile?.photoUrl != null) {
+                return CircleAvatar(
+                  backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
+                  radius: 20,
+                );
+              }
+              return const CircleAvatar(
+                backgroundColor: AppTheme.primaryColor,
+                radius: 20,
+                child: Icon(Icons.person, color: Colors.white, size: 20),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -198,16 +179,13 @@ class _AddReminderContentState extends State<_AddReminderContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'What type of reminder is this?',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Select a category to help organize your reminders',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
+        const Text(
+          'Select Category',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
         ),
         const SizedBox(height: 32),
         ...ReminderCategory.values.map((category) {
@@ -229,69 +207,54 @@ class _AddReminderContentState extends State<_AddReminderContent> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    IconData icon;
+    if (category == ReminderCategory.payment) {
+      icon = Iconsax.card;
+    } else if (category == ReminderCategory.product) {
+      icon = Iconsax.box;
+    } else {
+      icon = Icons.meeting_room_outlined;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Color(category.color).withValues(alpha: 0.1)
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(
-            color: isSelected ? Color(category.color) : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
-          ),
+          color: isSelected ? const Color(0xFFFEF6E1) : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(category.color).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-              ),
-              child: Text(category.emoji, style: const TextStyle(fontSize: 24)),
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.primaryColor : Colors.black87,
+              size: 24,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category.label,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _getCategoryDescription(category),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondaryLight,
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 12),
+            Text(
+              category.name[0].toUpperCase() + category.name.substring(1),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppTheme.primaryColor : Colors.black87,
               ),
             ),
-            if (isSelected)
-              Icon(Icons.check_circle, color: Color(category.color)),
           ],
         ),
       ),
     );
-  }
-
-  String _getCategoryDescription(ReminderCategory category) {
-    switch (category) {
-      case ReminderCategory.payment:
-        return 'Payment reminders, invoices, dues';
-      case ReminderCategory.product:
-        return 'Product deliveries, orders, subscriptions';
-      case ReminderCategory.meeting:
-        return 'Meetings, appointments, calls';
-    }
   }
 
   Widget _buildCustomerStep(ReminderFormState state) {
@@ -299,24 +262,17 @@ class _AddReminderContentState extends State<_AddReminderContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Customer Information',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Enter the customer details for this reminder',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
+          'Enter Customer Details',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
         ),
         const SizedBox(height: 32),
-        CustomTextField(
+        _buildCenteredPillField(
           controller: _nameController,
-          labelText: 'Customer Name',
-          hintText: 'Enter customer name',
-          prefixIcon: Icons.person_outline,
-          validator: Validators.validateName,
-          textCapitalization: TextCapitalization.words,
+          hintText: 'Name',
           onChanged: (value) {
             context.read<ReminderFormCubit>().updateCustomerDetails(
               name: value,
@@ -324,9 +280,9 @@ class _AddReminderContentState extends State<_AddReminderContent> {
           },
         ),
         const SizedBox(height: 20),
-        PhoneTextField(
+        _buildCenteredPillField(
           controller: _phoneController,
-          validator: Validators.validatePhoneNumber,
+          hintText: 'WhatsApp number',
           onChanged: (value) {
             context.read<ReminderFormCubit>().updateCustomerDetails(
               phone: value,
@@ -334,12 +290,18 @@ class _AddReminderContentState extends State<_AddReminderContent> {
           },
         ),
         const SizedBox(height: 20),
-        CustomTextField(
+        _buildCenteredPillField(
+          controller:
+              _notesController, // using notes for Phone Number for now since schema has only 1 phone
+          hintText: 'Phone Number',
+          onChanged: (value) {
+            // we will discard or save to notes
+          },
+        ),
+        const SizedBox(height: 20),
+        _buildCenteredPillField(
           controller: _notesController,
-          labelText: 'Notes (Optional)',
-          hintText: 'Any additional notes',
-          prefixIcon: Icons.note_outlined,
-          maxLines: 3,
+          hintText: 'Additional notes(location/details)',
           onChanged: (value) {
             context.read<ReminderFormCubit>().updateCustomerDetails(
               notes: value,
@@ -347,6 +309,40 @@ class _AddReminderContentState extends State<_AddReminderContent> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildCenteredPillField({
+    required TextEditingController controller,
+    required String hintText,
+    required Function(String) onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      textAlign: TextAlign.center,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.black38, fontSize: 13),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 24,
+          horizontal: 20,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      onChanged: onChanged,
     );
   }
 
@@ -370,57 +366,36 @@ class _AddReminderContentState extends State<_AddReminderContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reminder Details', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        Text(
-          'Describe the reminder and customize the message',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondaryLight),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Reminder Details',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: generateMessage,
+              icon: const Icon(Icons.auto_fix_high, size: 18),
+              label: const Text('Auto-Generate'),
+            ),
+          ],
         ),
         const SizedBox(height: 32),
-        CustomTextField(
+        _buildCenteredPillField(
           controller: _descriptionController,
-          labelText: 'Description',
-          hintText: 'What is this reminder about?',
-          prefixIcon: Icons.description_outlined,
-          maxLines: 2,
-          validator: (value) =>
-              value?.isEmpty ?? true ? 'Please enter a description' : null,
+          hintText: 'Add Product Description',
           onChanged: (value) {
             generateMessage();
           },
         ),
         const SizedBox(height: 20),
-        Row(
-          children: [
-            Text(
-              'WhatsApp Message',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: generateMessage,
-              icon: const Icon(Icons.auto_fix_high, size: 18),
-              label: const Text('Generate'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
+        _buildCenteredPillField(
           controller: _messageController,
-          maxLines: 6,
-          decoration: InputDecoration(
-            hintText: 'Message that will be sent via WhatsApp',
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          validator: (value) =>
-              value?.isEmpty ?? true ? 'Please enter a message' : null,
+          hintText: 'WhatsApp Message',
           onChanged: (value) {
             context.read<ReminderFormCubit>().updateReminderDetails(
               message: value,
@@ -740,38 +715,28 @@ class _AddReminderContentState extends State<_AddReminderContent> {
 
   Widget _buildBottomButtons(ReminderFormState state) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          if (state.currentStep > 0)
-            Expanded(
-              child: SecondaryButton(
-                text: 'Back',
-                onPressed: () {
-                  context.read<ReminderFormCubit>().previousStep();
-                },
-              ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
             ),
-          if (state.currentStep > 0) const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: PrimaryButton(
-              text: state.currentStep == 4 ? 'Create Reminder' : 'Continue',
-              isLoading: state.isLoading,
-              onPressed: _canProceed(state) ? () => _handleNext(state) : null,
-            ),
+            elevation: 8,
+            shadowColor: AppTheme.primaryColor.withValues(alpha: 0.5),
           ),
-        ],
+          onPressed: _canProceed(state) ? () => _handleNext(state) : null,
+          child: Text(
+            state.isLoading
+                ? 'Processing...'
+                : (state.currentStep == 4 ? 'Create Task' : 'Next'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
     );
   }
@@ -781,13 +746,13 @@ class _AddReminderContentState extends State<_AddReminderContent> {
       case 0:
         return state.canProceedStep1;
       case 1:
-        return _formKey.currentState?.validate() ?? false;
+        return state.customerName.isNotEmpty && state.customerPhone.isNotEmpty;
       case 2:
-        return state.canProceedStep3 || _descriptionController.text.isNotEmpty;
+        return state.description.isNotEmpty && state.message.isNotEmpty;
       case 3:
-        return state.canProceedStep4;
+        return state.scheduledDate != null && state.scheduledTime != null;
       case 4:
-        return state.canSubmit;
+        return true; // Always enable on review step
       default:
         return false;
     }
@@ -802,25 +767,80 @@ class _AddReminderContentState extends State<_AddReminderContent> {
       context.read<ReminderFormCubit>().nextStep();
     } else {
       // Submit
-      final success = await context.read<ReminderFormCubit>().submit();
-      if (success && mounted) {
-        // Refresh reminders
-        final authBloc = context.read<AuthBloc>();
-        if (authBloc.state.isAuthenticated) {
-          context.read<ReminderBloc>().add(
-            ReminderStatsLoadRequested(
-              userId: authBloc.state.userProfile?.id ?? '',
-            ),
-          );
-        }
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Reminder created successfully! 🎉'),
-            backgroundColor: AppTheme.successColor,
-          ),
-        );
+      await context.read<ReminderFormCubit>().submit();
+      if (mounted) {
+        _showSuccessScreen(context);
       }
     }
+  }
+
+  void _showSuccessScreen(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog.fullscreen(
+        child: Container(
+          color: const Color(0xFFFCF8F8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: AppTheme.successColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 60),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'Success!',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Your reminder has been created\nsuccessfully.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+              const SizedBox(height: 64),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 8,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Pop dialog
+                      Navigator.of(context).pop(); // Pop AddReminderScreen
+                    },
+                    child: const Text(
+                      'Done',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

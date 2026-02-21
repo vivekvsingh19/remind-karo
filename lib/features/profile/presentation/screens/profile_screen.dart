@@ -12,210 +12,206 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          // AuthWrapper handles routing automatically when step changes to phone
-        },
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      backgroundColor: const Color(0xFFFCF8F8),
+      body: SafeArea(
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            // AuthWrapper handles routing automatically when step changes to phone
+          },
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final user = state.userProfile;
+            final user = state.userProfile;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return Column(
               children: [
-                // Profile header
-                _buildProfileHeader(context, user?.name ?? 'User'),
-                const SizedBox(height: 32),
-                // Account section
-                _buildSection(
-                  context,
-                  title: 'Account Information',
-                  children: [
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.user,
-                      title: 'Full Name',
-                      subtitle: user?.name ?? 'Not set',
-                      onTap: () {
-                        // TODO: Navigate to edit profile
-                      },
+                _buildTopBar(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 10,
                     ),
-                    _buildSettingsItem(
-                      context,
-                      icon: Iconsax.call,
-                      title: 'Phone Number',
-                      subtitle: user?.phoneNumber != null
-                          ? '+91 ${user!.phoneNumber}'
-                          : 'Not set',
-                      onTap: null,
-                    ),
-                    if (user?.email != null)
-                      _buildSettingsItem(
-                        context,
-                        icon: Iconsax.sms,
-                        title: 'Email',
-                        subtitle: user!.email!,
-                        onTap: null,
-                      ),
-                    if (user?.id != null && user!.id.isNotEmpty)
-                      _buildSettingsItem(
-                        context,
-                        icon: Iconsax.document,
-                        title: 'User ID',
-                        subtitle: user.id,
-                        onTap: null,
-                      ),
-                    if (user?.photoUrl != null && user!.photoUrl!.isNotEmpty)
-                      _buildSettingsItem(
-                        context,
-                        icon: Iconsax.image,
-                        title: 'Profile Photo',
-                        subtitle: 'Photo URL set',
-                        onTap: null,
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 44),
-
-                // Support section
-
-                // Logout button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showLogoutConfirmation(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.errorColor,
-                      side: const BorderSide(color: AppTheme.errorColor),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    icon: const Icon(Iconsax.logout),
-                    label: const Text('Log Out'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Delete account button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showDeleteAccountConfirmation(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.errorColor,
-                      side: const BorderSide(color: AppTheme.errorColor),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    icon: const Icon(Iconsax.trash),
-                    label: const Text('Delete Account'),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Version info
-                Center(
-                  child: Text(
-                    'RemindKaro v1.0.0',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondaryLight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 20),
+                        // Profile header
+                        _buildProfileHeader(
+                          context,
+                          user?.name ?? 'Yash Nayak',
+                          user?.photoUrl,
+                        ),
+                        const SizedBox(height: 40),
+                        // Account section
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildSettingsItem(
+                                context,
+                                icon: Icons.edit,
+                                title: 'Update profile',
+                                onTap: () {},
+                              ),
+                              _buildDivider(),
+                              _buildSettingsItem(
+                                context,
+                                icon: Iconsax.shield_tick,
+                                title: 'Terms and Policy',
+                                onTap: () {},
+                              ),
+                              _buildDivider(),
+                              _buildSettingsItem(
+                                context,
+                                icon: Iconsax.key,
+                                title: 'Update Password',
+                                onTap: () {},
+                              ),
+                              _buildDivider(),
+                              _buildSettingsItem(
+                                context,
+                                icon: Iconsax.discount_shape,
+                                title: 'Referral Code',
+                                trailingText: '(Coming soon)',
+                                onTap: () {},
+                              ),
+                              _buildDivider(),
+                              _buildSettingsItem(
+                                context,
+                                icon: Iconsax.logout,
+                                title: 'Log Out',
+                                onTap: () => _showLogoutConfirmation(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
                 ),
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, String name) {
-    return Center(
-      child: Column(
+  Widget _buildTopBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      child: Row(
         children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              size: 24,
+              color: Colors.black54,
             ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/icons/profile.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                    child: Center(
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            alignment: Alignment.centerLeft,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(width: 8),
           Text(
-            name,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            'Profile',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondaryLight,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: Colors.grey.withValues(alpha: 0.1),
+      indent: 20,
+      endIndent: 20,
+    );
+  }
+
+  Widget _buildProfileHeader(
+    BuildContext context,
+    String name,
+    String? photoUrl,
+  ) {
+    return Center(
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: photoUrl != null
+                      ? Image.network(photoUrl, fit: BoxFit.cover)
+                      : Image.asset(
+                          'assets/icons/profile.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                                style: const TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    color: Colors.black87,
+                    size: 16,
+                  ),
+                ),
               ),
             ],
           ),
-          child: Column(children: children),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Text(
+            name,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -223,49 +219,44 @@ class ProfileScreen extends StatelessWidget {
     BuildContext context, {
     required IconData icon,
     required String title,
-    String? subtitle,
+    String? trailingText,
     VoidCallback? onTap,
   }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                color: const Color(0xFFFFEBAA),
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: AppTheme.primaryColor, size: 20),
+              child: Icon(icon, color: Colors.black87, size: 20),
             ),
             const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondaryLight,
-                      ),
-                    ),
-                ],
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+                fontSize: 15,
               ),
             ),
-            if (onTap != null)
-              const Icon(
-                Iconsax.arrow_right_3,
-                color: AppTheme.textSecondaryLight,
+            if (trailingText != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                trailingText,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade500,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                ),
               ),
+            ],
           ],
         ),
       ),
@@ -294,85 +285,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showDeleteAccountConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          // Show error if deletion fails
-          if (state.error != null && state.error!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error!),
-                backgroundColor: AppTheme.errorColor,
-              ),
-            );
-          }
-          // Navigate to login on successful deletion
-          if (state.step == AuthStep.phone &&
-              !state.isLoading &&
-              state.error == null) {
-            // Close the dialog; AuthWrapper will handle routing to LoginScreen
-            Navigator.pop(dialogContext);
-          }
-        },
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            return AlertDialog(
-              title: const Text('Delete Account'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (state.isLoading)
-                      const SizedBox(
-                        height: 60,
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (state.error != null && state.error!.isNotEmpty)
-                      Column(
-                        children: [
-                          Text(
-                            'Error: ${state.error}',
-                            style: TextStyle(color: AppTheme.errorColor),
-                          ),
-                        ],
-                      )
-                    else
-                      const Text(
-                        'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.',
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: state.isLoading
-                      ? null
-                      : () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: state.isLoading
-                      ? null
-                      : () {
-                          context.read<AuthBloc>().add(
-                            const AuthDeleteAccountRequested(),
-                          );
-                        },
-                  child: const Text(
-                    'Delete',
-                    style: TextStyle(color: AppTheme.errorColor),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
       ),
     );
   }

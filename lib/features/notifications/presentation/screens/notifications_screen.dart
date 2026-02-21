@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/models/notification_model.dart';
 import '../bloc/notification_bloc.dart';
+import 'view_notification_screen.dart';
 
 /// Screen to display all notifications
 class NotificationsScreen extends StatefulWidget {
@@ -20,21 +21,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   int _selectedTab = 0; // 0: Recent, 1: History
 
   @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState.userProfile?.id ?? 'mock_user';
+    context.read<NotificationBloc>().add(
+      NotificationsSubscriptionRequested(userId: userId),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: const Color(0xFFFCF8F8),
       body: SafeArea(
         child: Column(
           children: [
             _buildTopBar(context),
+            const SizedBox(height: 10),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context),
-                    const SizedBox(height: 20),
                     Center(child: _buildTabs()),
                     const SizedBox(height: 20),
                     Expanded(
@@ -98,6 +108,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               final notification = currentList[index];
                               return _NotificationCard(
                                 notification: notification,
+                                isHistory: _selectedTab == 1,
                                 onTap: () {
                                   if (!notification.isRead) {
                                     context.read<NotificationBloc>().add(
@@ -106,6 +117,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                       ),
                                     );
                                   }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ViewNotificationScreen(
+                                        notification: notification,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 onDismiss: () {
                                   context.read<NotificationBloc>().add(
@@ -132,31 +151,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildTopBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              size: 20,
-              color: Colors.black87,
-            ),
-            padding: EdgeInsets.zero,
-            alignment: Alignment.centerLeft,
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  size: 24,
+                  color: Colors.black87,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                alignment: Alignment.centerLeft,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Notifications',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
           ),
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state.userProfile?.photoUrl != null) {
                 return CircleAvatar(
                   backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
-                  radius: 18,
+                  radius: 20,
                 );
               }
               return const CircleAvatar(
                 backgroundColor: AppTheme.primaryColor,
-                radius: 18,
+                radius: 20,
                 child: Icon(Icons.person, color: Colors.white, size: 20),
               );
             },
@@ -166,47 +198,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Notifications',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        InkWell(
-          onTap: () => _showClearAllDialog(context),
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Row(
-              children: [
-                Text(
-                  'Clear',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.close, size: 16, color: Colors.grey.shade600),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTabs() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey.shade400, width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -224,7 +221,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.only(
@@ -234,12 +231,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             bottomRight: index == 1 ? const Radius.circular(30) : Radius.zero,
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppTheme.primaryColor,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) ...[
+              const Icon(Icons.check, size: 16, color: Colors.white),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : AppTheme.primaryColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -266,50 +273,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     );
   }
-
-  void _showClearAllDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Clear All Notifications'),
-        content: const Text(
-          'Are you sure you want to delete all notifications?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // Implement clear logic if available
-            },
-            child: const Text(
-              'Clear All',
-              style: TextStyle(color: AppTheme.errorColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Notification card widget
 class _NotificationCard extends StatelessWidget {
   final NotificationModel notification;
+  final bool isHistory;
   final VoidCallback onTap;
   final VoidCallback onDismiss;
 
   const _NotificationCard({
     required this.notification,
+    required this.isHistory,
     required this.onTap,
     required this.onDismiss,
   });
 
   @override
   Widget build(BuildContext context) {
+    final typeName = notification.type.name; // E.g. 'alarm', 'general'
+    // To fallback on 'Meeting' as per mockup for non-specific items
+    final categoryText = typeName.isNotEmpty
+        ? typeName[0].toUpperCase() + typeName.substring(1)
+        : 'Meeting';
+
     return Dismissible(
       key: Key(notification.id), // Add Dismissible for slide-to-delete
       onDismissed: (_) => onDismiss(),
@@ -325,8 +312,6 @@ class _NotificationCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          // No shadow logic to match clean design
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -334,59 +319,80 @@ class _NotificationCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  if (!isHistory) ...[
+                    Icon(
+                      Icons.radio_button_unchecked,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          notification.title,
+                          notification.title.isNotEmpty
+                              ? notification.title
+                              : 'Notification',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
-                                fontSize: 16,
+                                fontSize: 14,
                               ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          notification.body,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Colors.grey.shade600,
-                                fontSize: 13,
-                              ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 2),
                         Text(
                           _formatNotificationTime(notification.createdAt),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11,
                               ),
                         ),
                       ],
                     ),
                   ),
-                  InkWell(
-                    onTap: onDismiss,
-                    customBorder: const CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.close,
-                        size: 20,
-                        color: Colors.grey.shade500,
+                  const SizedBox(width: 8),
+                  // Pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      categoryText.length > 8
+                          ? 'Meeting'
+                          : categoryText, // Quick fallback
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
+                  if (isHistory) ...[
+                    const SizedBox(width: 12),
+                    Icon(
+                      notification.isRead
+                          ? Icons.check_circle_outline
+                          : Icons.cancel_outlined,
+                      color: notification.isRead ? Colors.green : Colors.red,
+                      size: 20,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -397,7 +403,7 @@ class _NotificationCard extends StatelessWidget {
   }
 
   String _formatNotificationTime(DateTime date) {
-    // Format: 3.15 PM 14 Feb
-    return DateFormat('h.mm a d MMM').format(date);
+    // Format: 5.15 PM  13 Feb
+    return DateFormat('h.mm a  dd MMM').format(date).toUpperCase();
   }
 }
