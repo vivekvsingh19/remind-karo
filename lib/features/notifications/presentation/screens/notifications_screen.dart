@@ -8,6 +8,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/models/notification_model.dart';
 import '../bloc/notification_bloc.dart';
 import 'view_notification_screen.dart';
+import '../../../../core/widgets/user_avatar.dart';
 
 /// Screen to display all notifications
 class NotificationsScreen extends StatefulWidget {
@@ -182,21 +183,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ],
             ),
           ),
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state.userProfile?.photoUrl != null) {
-                return CircleAvatar(
-                  backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
-                  radius: 20,
-                );
-              }
-              return const CircleAvatar(
-                backgroundColor: AppTheme.primaryColor,
-                radius: 20,
-                child: Icon(Icons.person, color: Colors.white, size: 20),
-              );
-            },
-          ),
+          const UserAvatarWidget(radius: 20),
         ],
       ),
     );

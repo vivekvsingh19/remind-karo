@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../reminders/presentation/bloc/reminder_bloc.dart';
 import '../../../reminders/presentation/screens/manage_reminders_screen.dart';
+import '../../../../core/widgets/user_avatar.dart';
 
 /// Dashboard screen showing reminders overview
 class DashboardScreen extends StatefulWidget {
@@ -105,21 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            Row(
-              children: [
-                if (state.userProfile?.photoUrl != null)
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
-                    radius: 20,
-                  )
-                else
-                  const CircleAvatar(
-                    backgroundColor: AppTheme.primaryColor,
-                    radius: 20,
-                    child: Icon(Icons.person, color: Colors.white),
-                  ),
-              ],
-            ),
+            Row(children: [const UserAvatarWidget(radius: 20)]),
           ],
         );
       },

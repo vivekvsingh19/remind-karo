@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/theme/app_theme.dart';
 
 import '../../data/models/reminder_model.dart';
 import '../bloc/reminder_bloc.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../../core/widgets/user_avatar.dart';
 
 /// Screen to manage and view all reminders
 class ManageRemindersScreen extends StatefulWidget {
@@ -134,21 +133,7 @@ class _ManageRemindersScreenState extends State<ManageRemindersScreen> {
             ),
           ],
           const Spacer(),
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state.userProfile?.photoUrl != null) {
-                return CircleAvatar(
-                  backgroundImage: NetworkImage(state.userProfile!.photoUrl!),
-                  radius: 18,
-                );
-              }
-              return const CircleAvatar(
-                backgroundColor: AppTheme.primaryColor,
-                radius: 18,
-                child: Icon(Icons.person, color: Colors.white, size: 20),
-              );
-            },
-          ),
+          const UserAvatarWidget(radius: 18),
         ],
       ),
     );

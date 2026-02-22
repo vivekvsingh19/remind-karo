@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import 'update_password_screen.dart';
 
@@ -176,34 +177,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: photoUrl != null
-                      ? Image.network(photoUrl, fit: BoxFit.cover)
-                      : Image.asset(
-                          'assets/icons/profile.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Text(
-                                name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                                style: const TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ),
+              UserAvatarWidget(radius: 55),
               Positioned(
                 bottom: 4,
                 right: 4,
