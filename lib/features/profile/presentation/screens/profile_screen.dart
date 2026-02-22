@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../core/services/avatar_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../widgets/avatar_picker_sheet.dart';
 import 'update_password_screen.dart';
 
 /// Profile screen showing user information and settings
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,9 +33,6 @@ class ProfileScreen extends StatelessWidget {
             }
 
             final user = state.userProfile;
-            // final name = (user?.name != null && user!.name.isNotEmpty)
-            //     ? user.name
-            //     : 'User';
 
             return Column(
               children: [
@@ -48,8 +52,6 @@ class ProfileScreen extends StatelessWidget {
                           context,
                           user?.name ?? 'User',
                           user?.photoUrl,
-                          // email: user?.email,
-                          // phoneNumber: user?.phoneNumber,
                         ),
                         const SizedBox(height: 20),
                         // Account section
@@ -175,26 +177,37 @@ class ProfileScreen extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Stack(
-            children: [
-              UserAvatarWidget(radius: 55),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.edit,
-                    color: Colors.black87,
-                    size: 16,
+          GestureDetector(
+            onTap: () {
+              AvatarPickerSheet.show(
+                context,
+                currentAvatarPath: AvatarService.current.value,
+                onAvatarSelected: (_) {
+                  // UserAvatarWidget reacts to AvatarService.current automatically
+                },
+              );
+            },
+            child: Stack(
+              children: [
+                UserAvatarWidget(radius: 55),
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      color: Colors.black87,
+                      size: 16,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           Text(

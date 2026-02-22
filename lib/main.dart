@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/services/avatar_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
@@ -21,6 +22,9 @@ void main() async {
   // Initialize notification service
   await NotificationService().initialize();
   await NotificationService().requestPermissions();
+
+  // Restore the user's saved avatar selection
+  await AvatarService.init();
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
