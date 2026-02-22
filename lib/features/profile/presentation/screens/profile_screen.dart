@@ -126,18 +126,19 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              size: 24,
-              color: Colors.black54,
+          if (Navigator.canPop(context))
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                size: 24,
+                color: Colors.black54,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              alignment: Alignment.centerLeft,
             ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            alignment: Alignment.centerLeft,
-          ),
-          const SizedBox(width: 8),
+          if (Navigator.canPop(context)) const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Profile',

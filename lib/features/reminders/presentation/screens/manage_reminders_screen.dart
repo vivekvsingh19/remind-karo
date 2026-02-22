@@ -118,21 +118,22 @@ class _ManageRemindersScreenState extends State<ManageRemindersScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () {
-              if (Navigator.canPop(context)) {
+          if (Navigator.canPop(context)) ...[
+            IconButton(
+              onPressed: () {
                 Navigator.pop(context);
-              }
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              size: 20,
-              color: Colors.black54,
+              },
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                size: 20,
+                color: Colors.black54,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              alignment: Alignment.centerLeft,
             ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            alignment: Alignment.centerLeft,
-          ),
+          ],
+          const Spacer(),
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state.userProfile?.photoUrl != null) {

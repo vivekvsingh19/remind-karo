@@ -155,28 +155,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  size: 24,
-                  color: Colors.black87,
+          Expanded(
+            child: Row(
+              children: [
+                if (Navigator.canPop(context)) ...[
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      size: 24,
+                      color: Colors.black87,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    alignment: Alignment.centerLeft,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  'Notifications',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                alignment: Alignment.centerLeft,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Notifications',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
