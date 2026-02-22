@@ -23,6 +23,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthGuestLoginRequested>(_onGuestLoginRequested);
     on<AuthChangePasswordRequested>(_onChangePasswordRequested);
+    on<AuthForgotPasswordRequested>(_onForgotPasswordRequested);
+    on<AuthVerifyForgotOtpRequested>(_onVerifyForgotOtpRequested);
+    on<AuthResetPasswordRequested>(_onResetPasswordRequested);
   }
 
   /// Check authentication status
@@ -226,6 +229,90 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             isLoading: false,
             error: null,
             // We can add a success flag in state if needed, but for now just clear loading
+          ),
+        );
+      },
+    );
+  }
+
+  /// Forgot password — send OTP
+  Future<void> _onForgotPasswordRequested(
+    AuthForgotPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.forgotPassword(email: event.email);
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            step: AuthStep.forgotPasswordOtpSent,
+            error: null,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Forgot password — verify OTP
+  Future<void> _onVerifyForgotOtpRequested(
+    AuthVerifyForgotOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.verifyForgotPasswordOtp(
+      email: event.email,
+      otp: event.otp,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // Success returns { message, reset_token }
+        final resetToken = response['reset_token'];
+        emit(
+          state.copyWith(
+            isLoading: false,
+            resetToken: resetToken,
+            error: null,
+            // Screen will listen for state changes to navigate
+          ),
+        );
+      },
+    );
+  }
+
+  /// Forgot password — reset
+  Future<void> _onResetPasswordRequested(
+    AuthResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.resetPassword(
+      resetToken: event.resetToken,
+      newPassword: event.newPassword,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            step: AuthStep.passwordResetSuccess,
+            error: null,
           ),
         );
       },

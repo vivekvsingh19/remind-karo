@@ -8,6 +8,8 @@ enum AuthStep {
   authenticated,
   guest,
   emailOtpVerification,
+  forgotPasswordOtpSent,
+  passwordResetSuccess,
 }
 
 /// Auth state
@@ -18,6 +20,7 @@ class AuthState extends Equatable {
   final String? verificationId;
   final String? phoneNumber;
   final UserModel? userProfile;
+  final String? resetToken;
 
   const AuthState({
     this.step = AuthStep.phone,
@@ -26,6 +29,7 @@ class AuthState extends Equatable {
     this.verificationId,
     this.phoneNumber,
     this.userProfile,
+    this.resetToken,
   });
 
   /// Initial state
@@ -45,6 +49,7 @@ class AuthState extends Equatable {
       verificationId: verificationId,
       phoneNumber: phoneNumber,
       userProfile: userProfile,
+      resetToken: resetToken,
     );
   }
 
@@ -56,6 +61,7 @@ class AuthState extends Equatable {
     String? verificationId,
     String? phoneNumber,
     UserModel? userProfile,
+    String? resetToken,
     bool clearError = false,
   }) {
     return AuthState(
@@ -65,6 +71,7 @@ class AuthState extends Equatable {
       verificationId: verificationId ?? this.verificationId,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       userProfile: userProfile ?? this.userProfile,
+      resetToken: resetToken ?? this.resetToken,
     );
   }
 
@@ -79,5 +86,6 @@ class AuthState extends Equatable {
     verificationId,
     phoneNumber,
     userProfile,
+    resetToken,
   ];
 }

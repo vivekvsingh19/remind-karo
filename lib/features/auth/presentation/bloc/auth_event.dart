@@ -174,3 +174,38 @@ class AuthChangePasswordRequested extends AuthEvent {
   @override
   List<Object?> get props => [currentPassword, newPassword];
 }
+
+/// Forgot Password — send OTP to email
+class AuthForgotPasswordRequested extends AuthEvent {
+  final String email;
+
+  const AuthForgotPasswordRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// Forgot Password — verify OTP
+class AuthVerifyForgotOtpRequested extends AuthEvent {
+  final String email;
+  final String otp;
+
+  const AuthVerifyForgotOtpRequested({required this.email, required this.otp});
+
+  @override
+  List<Object?> get props => [email, otp];
+}
+
+/// Forgot Password — set new password using reset token
+class AuthResetPasswordRequested extends AuthEvent {
+  final String resetToken;
+  final String newPassword;
+
+  const AuthResetPasswordRequested({
+    required this.resetToken,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [resetToken, newPassword];
+}

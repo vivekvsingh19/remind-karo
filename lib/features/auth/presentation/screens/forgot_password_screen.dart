@@ -7,7 +7,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import 'reset_password_screen.dart';
+import 'forgot_password_otp_screen.dart';
 
 /// Forgot Password screen to initiate password reset
 class ForgotPasswordScreen extends StatefulWidget {
@@ -38,12 +38,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               backgroundColor: AppTheme.errorColor,
             ),
           );
-        } else if (state.step == AuthStep.emailOtpVerification) {
-          // Navigate to reset password screen
+        } else if (state.step == AuthStep.forgotPasswordOtpSent) {
+          // Navigate to OTP verification screen
           final email = _emailController.text.trim();
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => ResetPasswordScreen(email: email),
+              builder: (_) => ForgotPasswordOtpScreen(email: email),
             ),
           );
         }
@@ -185,22 +185,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     final email = _emailController.text.trim();
 
-    // TODO: Implement forgot password logic in AuthBloc
-    // For now, show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Password reset link sent to $email'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    // Navigate to reset password screen after delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ResetPasswordScreen(email: email)),
-        );
-      }
-    });
+    context.read<AuthBloc>().add(AuthForgotPasswordRequested(email: email));
   }
 }

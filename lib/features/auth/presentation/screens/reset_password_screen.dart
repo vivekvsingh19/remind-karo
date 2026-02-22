@@ -11,8 +11,13 @@ import 'login_screen.dart';
 /// Reset Password screen where user sets new password
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
+  final String resetToken;
 
-  const ResetPasswordScreen({super.key, required this.email});
+  const ResetPasswordScreen({
+    super.key,
+    required this.email,
+    required this.resetToken,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -43,7 +48,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               backgroundColor: AppTheme.errorColor,
             ),
           );
-        } else if (state.step == AuthStep.authenticated) {
+        } else if (state.step == AuthStep.passwordResetSuccess) {
           // Password reset successful
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -217,21 +222,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // TODO: Implement reset password logic in AuthBloc
-    // Pass email and new password to backend
     final password = _passwordController.text;
-    assert(password.isNotEmpty, 'Password should not be empty');
 
-    // Uncomment below when implementing reset password event:
-    // context.read<AuthBloc>().add(
-    //   AuthResetPasswordRequested(
-    //     email: widget.email,
-    //     newPassword: password,
-    //   ),
-    // );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Resetting password for ${widget.email}...')),
+    context.read<AuthBloc>().add(
+      AuthResetPasswordRequested(
+        resetToken: widget.resetToken,
+        newPassword: password,
+      ),
     );
   }
 }

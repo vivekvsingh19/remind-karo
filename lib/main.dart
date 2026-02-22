@@ -110,6 +110,8 @@ class AuthWrapper extends StatelessWidget {
           case AuthStep.phone:
           case AuthStep.otp:
           case AuthStep.emailOtpVerification:
+          case AuthStep.forgotPasswordOtpSent:
+          case AuthStep.passwordResetSuccess:
             return const LoginScreen();
         }
       },

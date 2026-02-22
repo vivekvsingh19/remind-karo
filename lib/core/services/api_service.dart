@@ -183,6 +183,51 @@ class ApiService {
     }
   }
 
+  /// Forgot password — send OTP to email
+  Future<Map<String, dynamic>> forgotPassword({required String email}) async {
+    try {
+      final response = await _dio.post(
+        '/forgot-password',
+        data: {'email': email},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Forgot password — verify OTP, returns reset_token
+  Future<Map<String, dynamic>> verifyForgotPasswordOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/forgot-password/verify-otp',
+        data: {'email': email, 'otp': otp},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Forgot password — reset password with token
+  Future<Map<String, dynamic>> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/forgot-password/reset',
+        data: {'reset_token': resetToken, 'new_password': newPassword},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   /// Logout - clear token
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();

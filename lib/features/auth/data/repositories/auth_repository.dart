@@ -128,4 +128,48 @@ class AuthRepository {
       return Left(AuthFailure(message: e.toString()));
     }
   }
+
+  /// Forgot password — send OTP to registered email
+  Future<Either<Failure, Map<String, dynamic>>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final response = await _apiService.forgotPassword(email: email);
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Forgot password — verify OTP and receive reset token
+  Future<Either<Failure, Map<String, dynamic>>> verifyForgotPasswordOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await _apiService.verifyForgotPasswordOtp(
+        email: email,
+        otp: otp,
+      );
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Forgot password — reset password using the reset token
+  Future<Either<Failure, Map<String, dynamic>>> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _apiService.resetPassword(
+        resetToken: resetToken,
+        newPassword: newPassword,
+      );
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }
