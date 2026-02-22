@@ -22,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthGuestLoginRequested>(_onGuestLoginRequested);
+    on<AuthChangePasswordRequested>(_onChangePasswordRequested);
   }
 
   /// Check authentication status
@@ -198,6 +199,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Account deleted successfully
         print('✅ Account deleted successfully');
         emit(AuthState.initial());
+      },
+    );
+  }
+
+  /// Change password
+  Future<void> _onChangePasswordRequested(
+    AuthChangePasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, clearError: true));
+
+    final result = await _authRepository.changePassword(
+      currentPassword: event.currentPassword,
+      newPassword: event.newPassword,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+      },
+      (response) {
+        // Success
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: null,
+            // We can add a success flag in state if needed, but for now just clear loading
+          ),
+        );
       },
     );
   }

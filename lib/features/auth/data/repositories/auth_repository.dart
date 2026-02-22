@@ -102,6 +102,22 @@ class AuthRepository {
     }
   }
 
+  /// Change password using Backend API
+  Future<Either<Failure, Map<String, dynamic>>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _apiService.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      return Right(response);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
   /// Sign out (clear local token)
   Future<Either<Failure, void>> signOut() async {
     try {

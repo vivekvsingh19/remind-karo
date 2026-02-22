@@ -160,3 +160,17 @@ class AuthResendOtpRequested extends AuthEvent {
 class AuthDeleteAccountRequested extends AuthEvent {
   const AuthDeleteAccountRequested();
 }
+
+/// Change password
+class AuthChangePasswordRequested extends AuthEvent {
+  final String currentPassword;
+  final String newPassword;
+
+  const AuthChangePasswordRequested({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [currentPassword, newPassword];
+}

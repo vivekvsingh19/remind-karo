@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import 'update_password_screen.dart';
 
 /// Profile screen showing user information and settings
 class ProfileScreen extends StatelessWidget {
@@ -24,13 +25,13 @@ class ProfileScreen extends StatelessWidget {
             }
 
             final user = state.userProfile;
-            final name = (user?.name != null && user!.name.isNotEmpty)
-                ? user.name
-                : 'User';
+            // final name = (user?.name != null && user!.name.isNotEmpty)
+            //     ? user.name
+            //     : 'User';
 
             return Column(
               children: [
-                _buildTopBar(context, name),
+                _buildTopBar(context),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -44,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                         // Profile header
                         _buildProfileHeader(
                           context,
-                          name,
+                          user?.name ?? 'User',
                           user?.photoUrl,
                           // email: user?.email,
                           // phoneNumber: user?.phoneNumber,
@@ -79,7 +80,15 @@ class ProfileScreen extends StatelessWidget {
                                 context,
                                 icon: Iconsax.key,
                                 title: 'Update Password',
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const UpdatePasswordScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildDivider(),
                               _buildSettingsItem(
@@ -112,7 +121,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, String name) {
+  Widget _buildTopBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
@@ -131,7 +140,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              name,
+              'Profile',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.black54,

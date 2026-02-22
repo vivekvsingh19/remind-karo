@@ -164,6 +164,25 @@ class ApiService {
     }
   }
 
+  /// Change password
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _dio.put(
+        '/change-password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   /// Logout - clear token
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
